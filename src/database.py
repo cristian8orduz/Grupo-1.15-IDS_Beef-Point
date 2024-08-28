@@ -51,6 +51,7 @@ def create_tables():
         estado TEXT NOT NULL,
         direccion TEXT,
         numero_contacto TEXT,
+        nombre_cliente TEXT,
         FOREIGN KEY (mesa_id) REFERENCES mesas(id),
         FOREIGN KEY (trabajador_id) REFERENCES trabajadores(id)
     )

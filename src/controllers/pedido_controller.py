@@ -4,13 +4,13 @@ from models.pedido import Pedido
 from models.pedido_detalle import PedidoDetalle
 import datetime
 
-def create_pedido(mesa_id, trabajador_id, estado, direccion=None, numero_contacto=None):
+def create_pedido(mesa_id, trabajador_id, estado, direccion=None, numero_contacto=None, nombre_cliente=None):
     conn = connect()
     cursor = conn.cursor()
     cursor.execute('''
-    INSERT INTO pedidos (mesa_id, trabajador_id, fecha_hora, estado, direccion, numero_contacto) 
-    VALUES (?, ?, datetime('now'), ?, ?, ?)
-    ''', (mesa_id, trabajador_id, estado, direccion, numero_contacto))
+    INSERT INTO pedidos (mesa_id, trabajador_id, fecha_hora, estado, direccion, numero_contacto, nombre_cliente) 
+    VALUES (?, ?, datetime('now'), ?, ?, ?, ?)
+    ''', (mesa_id, trabajador_id, estado, direccion, numero_contacto, nombre_cliente))
     pedido_id = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -76,7 +76,7 @@ def get_pedidos_confirmados():
     conn = connect()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT p.id, p.mesa_id, t.nombre, p.direccion
+        SELECT p.id, p.mesa_id, t.nombre, p.nombre_cliente, p.direccion
         FROM pedidos p
         JOIN trabajadores t ON p.trabajador_id = t.id
         WHERE p.estado = 'Confirmado'
@@ -96,6 +96,7 @@ def get_pedidos_confirmados():
 
     conn.close()
     return pedidos, detalles
+
 
 
 
