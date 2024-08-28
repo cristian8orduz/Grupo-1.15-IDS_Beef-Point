@@ -1,6 +1,6 @@
 # src/views/resumen_pedido.py
 import tkinter as tk
-from controllers.pedido_controller import get_detalle_by_pedido, confirmar_pedido
+from controllers.pedido_controller import get_detalle_by_pedido, confirmar_pedido, cancelar_pedido
 import os
 
 class ResumenPedidoView(tk.Toplevel):
@@ -26,6 +26,9 @@ class ResumenPedidoView(tk.Toplevel):
         self.button_confirmar = tk.Button(self, text="Confirmar Pedido", command=self.confirmar_pedido)
         self.button_confirmar.pack(pady=10)
 
+        self.button_cancelar = tk.Button(self, text="Cancelar Pedido", command=self.cancelar_pedido)
+        self.button_cancelar.pack(pady=10)
+
     def mostrar_resumen(self):
         detalles = get_detalle_by_pedido(self.pedido_id)
 
@@ -40,4 +43,9 @@ class ResumenPedidoView(tk.Toplevel):
     def confirmar_pedido(self):
         confirmar_pedido(self.pedido_id)  # Actualiza el estado del pedido en la base de datos
         tk.messagebox.showinfo("Éxito", "Pedido confirmado.")
+        self.destroy()
+
+    def cancelar_pedido(self):
+        cancelar_pedido(self.pedido_id)  # Actualiza el estado del pedido a 'Cancelado'
+        tk.messagebox.showinfo("Información", "Pedido cancelado.")
         self.destroy()

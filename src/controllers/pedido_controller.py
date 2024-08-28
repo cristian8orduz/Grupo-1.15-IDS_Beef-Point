@@ -65,6 +65,13 @@ def get_detalle_by_pedido(pedido_id):
 
     return rows
 
+def cancelar_pedido(pedido_id):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE pedidos SET estado = 'Cancelado' WHERE id = ?", (pedido_id,))
+    conn.commit()
+    conn.close()
+
 def get_pedidos_confirmados():
     conn = connect()
     cursor = conn.cursor()
@@ -89,6 +96,7 @@ def get_pedidos_confirmados():
 
     conn.close()
     return pedidos, detalles
+
 
 
 
