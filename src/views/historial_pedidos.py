@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-from controllers.pedido_controller import get_pedidos_confirmados
+from controllers.pedido_controller import get_pedidos_confirmados, delete_pedido
+from views.editar_pedido import EditarPedidoView
 import os
 import platform
 
@@ -97,5 +98,21 @@ class HistorialPedidosView(tk.Toplevel):
                 detalle_label = tk.Label(self.historial_frame, text=f"  - {producto}: {cantidad}", font=("Arial", 11))
                 detalle_label.pack(anchor="w", padx=30)
 
+            # Botones de Editar y Eliminar
+            edit_button = tk.Button(self.historial_frame, text="Editar", command=lambda pid=pedido_id: self.editar_pedido(pid), bg="#FFA500", fg="white", font=("Arial", 10))
+            edit_button.pack(anchor="w", padx=20, pady=5)
+
+            delete_button = tk.Button(self.historial_frame, text="Eliminar", command=lambda pid=pedido_id: self.eliminar_pedido(pid), bg="#FF0000", fg="white", font=("Arial", 10))
+            delete_button.pack(anchor="w", padx=20, pady=5)
+
             separator = tk.Label(self.historial_frame, text="─" * 60, fg="#888")
             separator.pack(pady=10)
+
+    def editar_pedido(self, pedido_id):
+        EditarPedidoView(self, pedido_id)
+
+    def eliminar_pedido(self, pedido_id):
+        if tk.messagebox.askyesno("Confirmar", "¿Estás seguro de que quieres eliminar este pedido?"):
+            delete_pedido(pedido_id)
+            tk.messagebox.showinfo("Éxito", "Pedido eliminado.")
+            self.mostrar_historial()
