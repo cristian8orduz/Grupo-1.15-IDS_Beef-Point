@@ -59,13 +59,14 @@ class HistorialPedidosView(tk.Toplevel):
             self.canvas.bind_all("<Button-5>", self.on_mousewheel)
 
     def on_mousewheel(self, event):
-        if platform.system() == 'Windows':
-            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        else:
-            if event.num == 4:
-                self.canvas.yview_scroll(-1, "units")
-            elif event.num == 5:
-                self.canvas.yview_scroll(1, "units")
+        if self.canvas.winfo_exists():  # Verifica si el Canvas aún existe
+            if platform.system() == 'Windows':
+                self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            else:
+                if event.num == 4:
+                    self.canvas.yview_scroll(-1, "units")
+                elif event.num == 5:
+                    self.canvas.yview_scroll(1, "units")
 
     def center_window(self):
         """Centrar la ventana en la pantalla."""

@@ -40,24 +40,30 @@ class ResumenPedidoView(tk.Toplevel):
         self.resumen_frame = tk.Frame(self, bg="#F0F0F0")
         self.resumen_frame.pack(pady=10)
 
-        # Campos para editar información del cliente
-        self.label_nombre_cliente = tk.Label(self, text="Nombre del Cliente:", **label_style)
-        self.label_nombre_cliente.pack(pady=5)
-        self.entry_nombre_cliente = tk.Entry(self, **entry_style)
-        self.entry_nombre_cliente.insert(0, self.pedido.nombre_cliente)
-        self.entry_nombre_cliente.pack(pady=5, fill=tk.X, padx=20)
+        # Mostrar campos de cliente solo si el pedido es a domicilio
+        if self.pedido.direccion or self.pedido.numero_contacto or self.pedido.nombre_cliente:
+            self.label_nombre_cliente = tk.Label(self, text="Nombre del Cliente:", **label_style)
+            self.label_nombre_cliente.pack(pady=5)
+            self.entry_nombre_cliente = tk.Entry(self, **entry_style)
+            self.entry_nombre_cliente.insert(0, self.pedido.nombre_cliente)
+            self.entry_nombre_cliente.pack(pady=5, fill=tk.X, padx=20)
 
-        self.label_direccion = tk.Label(self, text="Dirección:", **label_style)
-        self.label_direccion.pack(pady=5)
-        self.entry_direccion = tk.Entry(self, **entry_style)
-        self.entry_direccion.insert(0, self.pedido.direccion)
-        self.entry_direccion.pack(pady=5, fill=tk.X, padx=20)
+            self.label_direccion = tk.Label(self, text="Dirección:", **label_style)
+            self.label_direccion.pack(pady=5)
+            self.entry_direccion = tk.Entry(self, **entry_style)
+            self.entry_direccion.insert(0, self.pedido.direccion)
+            self.entry_direccion.pack(pady=5, fill=tk.X, padx=20)
 
-        self.label_contacto = tk.Label(self, text="Número de Contacto:", **label_style)
-        self.label_contacto.pack(pady=5)
-        self.entry_contacto = tk.Entry(self, **entry_style)
-        self.entry_contacto.insert(0, self.pedido.numero_contacto)
-        self.entry_contacto.pack(pady=5, fill=tk.X, padx=20)
+            self.label_contacto = tk.Label(self, text="Número de Contacto:", **label_style)
+            self.label_contacto.pack(pady=5)
+            self.entry_contacto = tk.Entry(self, **entry_style)
+            self.entry_contacto.insert(0, self.pedido.numero_contacto)
+            self.entry_contacto.pack(pady=5, fill=tk.X, padx=20)
+        else:
+            # Si no es un pedido a domicilio, no mostrar estos campos y saltar a mostrar el resumen del pedido
+            self.entry_nombre_cliente = None
+            self.entry_direccion = None
+            self.entry_contacto = None
 
         self.mostrar_resumen()
 
@@ -88,12 +94,12 @@ class ResumenPedidoView(tk.Toplevel):
             label.pack(anchor="w")
 
     def confirmar_pedido(self):
-        # Actualizar la información del pedido con los datos editados
-        nombre_cliente = self.entry_nombre_cliente.get()
-        direccion = self.entry_direccion.get()
-        numero_contacto = self.entry_contacto.get()
-
-        update_pedido_info(self.pedido_id, nombre_cliente, direccion, numero_contacto)
+        # Actualizar la información del pedido solo si es a domicilio
+        if self.entry_nombre_cliente and self.entry_direccion and self.entry_contacto:
+            nombre_cliente = self.entry_nombre_cliente.get()
+            direccion = self.entry_direccion.get()
+            numero_contacto = self.entry_contacto.get()
+            update_pedido_info(self.pedido_id, nombre_cliente, direccion, numero_contacto)
 
         confirmar_pedido(self.pedido_id)
         tk.messagebox.showinfo("Éxito", "Pedido confirmado.")
@@ -103,3 +109,4 @@ class ResumenPedidoView(tk.Toplevel):
         cancelar_pedido(self.pedido_id)
         tk.messagebox.showinfo("Información", "Pedido cancelado.")
         self.destroy()
+
