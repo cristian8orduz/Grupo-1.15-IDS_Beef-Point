@@ -7,7 +7,7 @@ class EditarPedidoView(tk.Toplevel):
     def __init__(self, parent, pedido_id):
         super().__init__(parent)
         self.title("Editar Pedido - Beef Point")
-        self.geometry("600x700")
+        self.geometry("480x530")
         self.configure(bg="#F0F0F0")
 
         # Centrar la ventana
@@ -19,7 +19,7 @@ class EditarPedidoView(tk.Toplevel):
 
         self.pedido_id = pedido_id
         self.parent = parent  # Para actualizar el historial al cerrar la ventana
-        self.productos_actualizados = []  # Lista para almacenar los productos y cantidades actualizadas
+        self.productos_actualizados = {}  # Diccionario para almacenar los productos y cantidades actualizadas
         self.nuevos_productos = []  # Lista para almacenar los nuevos productos a agregar
         self.productos_eliminar = []  # Lista para almacenar los productos a eliminar
 
@@ -51,9 +51,9 @@ class EditarPedidoView(tk.Toplevel):
             cantidad_entry = tk.Entry(frame, textvariable=cantidad_var, font=("Arial", 12), width=4)
             cantidad_entry.pack(side=tk.LEFT, padx=5)
             
-            self.productos_actualizados.append((producto_id, cantidad_var))
+            self.productos_actualizados[producto_id] = (cantidad_var, frame)
 
-            delete_button = tk.Button(frame, text="Eliminar", command=lambda pid=producto_id: self.eliminar_producto(pid, frame), font=("Arial", 10), bg="#FF0000", fg="white")
+            delete_button = tk.Button(frame, text="Eliminar", command=lambda pid=producto_id: self.eliminar_producto(pid), font=("Arial", 10), bg="#FF0000", fg="white")
             delete_button.pack(side=tk.LEFT, padx=10)
 
         # Mostrar productos adicionales por categoría
@@ -99,9 +99,11 @@ class EditarPedidoView(tk.Toplevel):
 
         self.nuevos_productos.append((producto.id, cantidad_var))
 
-    def eliminar_producto(self, producto_id, frame):
-        self.productos_eliminar.append(producto_id)
-        frame.destroy()
+    def eliminar_producto(self, producto_id):
+        if producto_id in self.productos_actualizados:
+            _, frame = self.productos_actualizados.pop(producto_id)
+            self.productos_eliminar.append(producto_id)
+            frame.destroy()
 
     def guardar_cambios(self):
         # Eliminar productos seleccionados
@@ -109,7 +111,7 @@ class EditarPedidoView(tk.Toplevel):
             delete_producto_from_pedido(self.pedido_id, producto_id)
 
         # Actualizar cantidades de productos existentes
-        for producto_id, cantidad_var in self.productos_actualizados:
+        for producto_id, (cantidad_var, _) in self.productos_actualizados.items():
             nueva_cantidad = cantidad_var.get()
             if nueva_cantidad > 0:
                 update_producto_cantidad(self.pedido_id, producto_id, nueva_cantidad)

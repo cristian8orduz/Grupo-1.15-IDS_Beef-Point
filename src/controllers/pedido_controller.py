@@ -139,3 +139,15 @@ def delete_producto_from_pedido(pedido_id, producto_id):
     cursor.execute("DELETE FROM pedido_detalle WHERE pedido_id = ? AND producto_id = ?", (pedido_id, producto_id))
     conn.commit()
     conn.close()
+
+def update_pedido_info(pedido_id, nombre_cliente, direccion, numero_contacto):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE pedidos 
+        SET nombre_cliente = ?, direccion = ?, numero_contacto = ? 
+        WHERE id = ?
+    """, (nombre_cliente, direccion, numero_contacto, pedido_id))
+    conn.commit()
+    conn.close()
+

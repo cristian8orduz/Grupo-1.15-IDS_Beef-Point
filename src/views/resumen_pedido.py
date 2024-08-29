@@ -1,24 +1,28 @@
 import tkinter as tk
-from controllers.pedido_controller import get_detalle_by_pedido, confirmar_pedido, cancelar_pedido
+from controllers.pedido_controller import get_detalle_by_pedido, confirmar_pedido, cancelar_pedido, get_pedido, update_pedido_info
 import os
 
 class ResumenPedidoView(tk.Toplevel):
     def __init__(self, parent, pedido_id):
         super().__init__(parent)
         self.title("Resumen del Pedido - Beef Point")
-        self.geometry("500x400")
+        self.geometry("500x500")
         self.configure(bg="#F0F0F0")  # Fondo suave
 
         # Centrar la ventana
         self.center_window()
-        
+
         # Establecer el icono de la ventana
         icon_path = os.path.join(os.path.dirname(__file__), '../assets/img/icon.ico')
         self.iconbitmap(icon_path)
 
         self.pedido_id = pedido_id
 
+        # Cargar información del pedido
+        self.pedido = get_pedido(self.pedido_id)
+
         label_style = {"font": ("Arial", 14, "bold"), "bg": "#F0F0F0"}
+        entry_style = {"font": ("Arial", 12), "bd": 2}
         button_style = {
             "font": ("Arial", 12, "bold"),
             "bg": "#4CAF50",
@@ -34,7 +38,26 @@ class ResumenPedidoView(tk.Toplevel):
         self.label_resumen.pack(pady=10)
 
         self.resumen_frame = tk.Frame(self, bg="#F0F0F0")
-        self.resumen_frame.pack(pady=20)
+        self.resumen_frame.pack(pady=10)
+
+        # Campos para editar información del cliente
+        self.label_nombre_cliente = tk.Label(self, text="Nombre del Cliente:", **label_style)
+        self.label_nombre_cliente.pack(pady=5)
+        self.entry_nombre_cliente = tk.Entry(self, **entry_style)
+        self.entry_nombre_cliente.insert(0, self.pedido.nombre_cliente)
+        self.entry_nombre_cliente.pack(pady=5, fill=tk.X, padx=20)
+
+        self.label_direccion = tk.Label(self, text="Dirección:", **label_style)
+        self.label_direccion.pack(pady=5)
+        self.entry_direccion = tk.Entry(self, **entry_style)
+        self.entry_direccion.insert(0, self.pedido.direccion)
+        self.entry_direccion.pack(pady=5, fill=tk.X, padx=20)
+
+        self.label_contacto = tk.Label(self, text="Número de Contacto:", **label_style)
+        self.label_contacto.pack(pady=5)
+        self.entry_contacto = tk.Entry(self, **entry_style)
+        self.entry_contacto.insert(0, self.pedido.numero_contacto)
+        self.entry_contacto.pack(pady=5, fill=tk.X, padx=20)
 
         self.mostrar_resumen()
 
@@ -65,6 +88,13 @@ class ResumenPedidoView(tk.Toplevel):
             label.pack(anchor="w")
 
     def confirmar_pedido(self):
+        # Actualizar la información del pedido con los datos editados
+        nombre_cliente = self.entry_nombre_cliente.get()
+        direccion = self.entry_direccion.get()
+        numero_contacto = self.entry_contacto.get()
+
+        update_pedido_info(self.pedido_id, nombre_cliente, direccion, numero_contacto)
+
         confirmar_pedido(self.pedido_id)
         tk.messagebox.showinfo("Éxito", "Pedido confirmado.")
         self.destroy()
