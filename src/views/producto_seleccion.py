@@ -10,8 +10,8 @@ class ProductoSeleccionView(tk.Toplevel):
     def __init__(self, parent, pedido_id):
         super().__init__(parent)
         self.title("Seleccionar Productos - Beef Point")
-        self.geometry("550x650")
-        self.configure(bg="#EAECEE")  # Fondo suave más claro
+        self.geometry("600x700")
+        self.configure(bg="#34495E")  # Fondo oscuro profesional
 
         # Centrar la ventana
         self.center_window()
@@ -24,35 +24,36 @@ class ProductoSeleccionView(tk.Toplevel):
         self.categorias = get_all_categorias()
 
         # Estilo para etiquetas y botones
-        label_style = {"font": ("Verdana", 13, "bold"), "bg": "#EAECEE"}
+        label_style = {"font": ("Helvetica", 14, "bold"), "bg": "#34495E", "fg": "white"}
         button_style = {
-            "font": ("Verdana", 12, "bold"),
-            "bg": "#4CAF50",
+            "font": ("Helvetica", 12, "bold"),
+            "bg": "#1ABC9C",
             "fg": "white",
             "activebackground": "#16A085",
             "bd": 0,
-            "relief": "flat"
+            "relief": "flat",
+            "cursor": "hand2"
         }
 
         self.label_categoria = tk.Label(self, text="Seleccione la Categoría:", **label_style)
-        self.label_categoria.pack(pady=10)
+        self.label_categoria.pack(pady=15)
 
         self.categoria_var = tk.StringVar(self)
         self.categoria_var.set("Seleccionar Categoría")
 
-        self.categoria_dropdown = ttk.Combobox(self, textvariable=self.categoria_var, values=[cat.nombre for cat in self.categorias], font=("Verdana", 12))
-        self.categoria_dropdown.pack(pady=10)
+        self.categoria_dropdown = ttk.Combobox(self, textvariable=self.categoria_var, values=[cat.nombre for cat in self.categorias], font=("Helvetica", 12))
+        self.categoria_dropdown.pack(pady=15)
         
         # Asociar el cambio en la selección de categoría al método para mostrar productos
         self.categoria_dropdown.bind("<<ComboboxSelected>>", lambda event: self.mostrar_productos())
 
         # Frame para productos con scrollbar
-        self.producto_frame = tk.Frame(self, bg="#EAECEE")
+        self.producto_frame = tk.Frame(self, bg="#34495E")
         self.producto_frame.pack(pady=20, fill=tk.BOTH, expand=True)
 
-        self.canvas = tk.Canvas(self.producto_frame, bg="#EAECEE")
+        self.canvas = tk.Canvas(self.producto_frame, bg="#34495E")
         self.scrollbar = tk.Scrollbar(self.producto_frame, orient="vertical", command=self.canvas.yview)
-        self.scrollable_frame = tk.Frame(self.canvas, bg="#EAECEE")
+        self.scrollable_frame = tk.Frame(self.canvas, bg="#34495E")
 
         self.scrollable_frame.bind(
             "<Configure>",
@@ -68,7 +69,7 @@ class ProductoSeleccionView(tk.Toplevel):
         self.scrollbar.pack(side="right", fill="y")
 
         self.button_terminar = tk.Button(self, text="Terminar Pedido", command=self.terminar_pedido, **button_style)
-        self.button_terminar.pack(pady=20)
+        self.button_terminar.pack(pady=25)
 
     def center_window(self):
         """Centrar la ventana en la pantalla."""
@@ -92,26 +93,26 @@ class ProductoSeleccionView(tk.Toplevel):
                 self.crear_producto_widget(producto)
 
     def crear_producto_widget(self, producto):
-        frame = tk.Frame(self.scrollable_frame, bg="#EAECEE")
-        frame.pack(pady=8, fill=tk.X)
+        frame = tk.Frame(self.scrollable_frame, bg="#34495E")
+        frame.pack(pady=10, fill=tk.X)
 
-        label = tk.Label(frame, text=producto.nombre, font=("Verdana", 12), bg="#EAECEE")
-        label.pack(side=tk.LEFT, padx=10)
+        label = tk.Label(frame, text=producto.nombre, font=("Helvetica", 12), bg="#34495E", fg="white")
+        label.pack(side=tk.LEFT, padx=15)
 
         cantidad_var = tk.IntVar()
         cantidad_var.set(0)
 
-        minus_button = tk.Button(frame, text="-", command=lambda: self.actualizar_cantidad(cantidad_var, -1), font=("Verdana", 12), width=2)
+        minus_button = tk.Button(frame, text="-", command=lambda: self.actualizar_cantidad(cantidad_var, -1), font=("Helvetica", 12), width=2)
         minus_button.pack(side=tk.LEFT)
 
-        cantidad_label = tk.Label(frame, textvariable=cantidad_var, font=("Verdana", 12), width=4, anchor='center')
-        cantidad_label.pack(side=tk.LEFT, padx=5)
+        cantidad_label = tk.Label(frame, textvariable=cantidad_var, font=("Helvetica", 12), width=4, anchor='center', bg="#34495E", fg="white")
+        cantidad_label.pack(side=tk.LEFT, padx=10)
 
-        plus_button = tk.Button(frame, text="+", command=lambda: self.actualizar_cantidad(cantidad_var, 1), font=("Verdana", 12), width=2)
+        plus_button = tk.Button(frame, text="+", command=lambda: self.actualizar_cantidad(cantidad_var, 1), font=("Helvetica", 12), width=2)
         plus_button.pack(side=tk.LEFT)
 
-        add_button = tk.Button(frame, text="Añadir", command=lambda: self.add_producto(producto.id, cantidad_var.get()), font=("Verdana", 12))
-        add_button.pack(side=tk.LEFT, padx=10)
+        add_button = tk.Button(frame, text="Añadir", command=lambda: self.add_producto(producto.id, cantidad_var.get()), font=("Helvetica", 12))
+        add_button.pack(side=tk.LEFT, padx=15)
 
     def actualizar_cantidad(self, var, delta):
         var.set(max(0, var.get() + delta))
@@ -129,5 +130,3 @@ class ProductoSeleccionView(tk.Toplevel):
         resumen_view.lift()  # Traer la ventana al frente
         resumen_view.focus_force()  # Forzar el foco a la ventana de resumen
         self.destroy()
-
-

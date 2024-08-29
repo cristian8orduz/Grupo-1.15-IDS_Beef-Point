@@ -6,8 +6,8 @@ class ResumenPedidoView(tk.Toplevel):
     def __init__(self, parent, pedido_id):
         super().__init__(parent)
         self.title("Resumen del Pedido - Beef Point")
-        self.geometry("500x500")
-        self.configure(bg="#F0F0F0")  # Fondo suave
+        self.geometry("550x550")
+        self.configure(bg="#2C3E50")  # Fondo oscuro para un diseño más profesional
 
         # Centrar la ventana
         self.center_window()
@@ -21,24 +21,25 @@ class ResumenPedidoView(tk.Toplevel):
         # Cargar información del pedido
         self.pedido = get_pedido(self.pedido_id)
 
-        label_style = {"font": ("Arial", 14, "bold"), "bg": "#F0F0F0"}
-        entry_style = {"font": ("Arial", 12), "bd": 2}
+        label_style = {"font": ("Helvetica", 14, "bold"), "bg": "#2C3E50", "fg": "white"}
+        entry_style = {"font": ("Helvetica", 12), "bd": 2, "relief": "solid"}
         button_style = {
-            "font": ("Arial", 12, "bold"),
-            "bg": "#4CAF50",
+            "font": ("Helvetica", 12, "bold"),
+            "bg": "#1ABC9C",
             "fg": "white",
-            "activebackground": "#45A049",
+            "activebackground": "#16A085",
             "bd": 0,
             "relief": "flat",
+            "cursor": "hand2",
             "width": 20,
             "height": 2
         }
 
         self.label_resumen = tk.Label(self, text="Resumen del Pedido", **label_style)
-        self.label_resumen.pack(pady=10)
+        self.label_resumen.pack(pady=20)
 
-        self.resumen_frame = tk.Frame(self, bg="#F0F0F0")
-        self.resumen_frame.pack(pady=10)
+        self.resumen_frame = tk.Frame(self, bg="#34495E", bd=2, relief="solid")
+        self.resumen_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
         # Mostrar campos de cliente solo si el pedido es a domicilio
         if self.pedido.direccion or self.pedido.numero_contacto or self.pedido.nombre_cliente:
@@ -68,7 +69,7 @@ class ResumenPedidoView(tk.Toplevel):
         self.mostrar_resumen()
 
         self.button_confirmar = tk.Button(self, text="Confirmar Pedido", command=self.confirmar_pedido, **button_style)
-        self.button_confirmar.pack(pady=10)
+        self.button_confirmar.pack(pady=20)
 
         self.button_cancelar = tk.Button(self, text="Cancelar Pedido", command=self.cancelar_pedido, **button_style)
         self.button_cancelar.pack(pady=10)
@@ -90,8 +91,8 @@ class ResumenPedidoView(tk.Toplevel):
 
         for detalle in detalles:
             producto_id, producto_nombre, categoria_nombre, cantidad = detalle
-            label = tk.Label(self.resumen_frame, text=f"{categoria_nombre} - {producto_nombre} x {cantidad}", font=("Arial", 12), bg="#F0F0F0")
-            label.pack(anchor="w")
+            label = tk.Label(self.resumen_frame, text=f"{categoria_nombre} - {producto_nombre} x {cantidad}", font=("Helvetica", 12), bg="#34495E", fg="white")
+            label.pack(anchor="w", padx=10, pady=5)
 
     def confirmar_pedido(self):
         # Actualizar la información del pedido solo si es a domicilio
@@ -109,4 +110,3 @@ class ResumenPedidoView(tk.Toplevel):
         cancelar_pedido(self.pedido_id)
         tk.messagebox.showinfo("Información", "Pedido cancelado.")
         self.destroy()
-

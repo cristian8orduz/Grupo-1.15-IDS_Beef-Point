@@ -8,54 +8,58 @@ class LoginView(tk.Toplevel):
         super().__init__(parent)
         self.parent = parent
         self.title("Iniciar Sesión - Beef Point")
-        self.geometry("400x250")
-        self.configure(bg="#F0F0F0")  # Color de fondo suave
+        self.geometry("450x300")
+        self.configure(bg="#2C3E50")  # Fondo oscuro profesional
         
         # Centrar la ventana
         self.center_window()
-        
+
         # Establecer el icono de la ventana
         icon_path = os.path.join(os.path.dirname(__file__), '../assets/img/icon.ico')
         self.iconbitmap(icon_path)
 
-        label_style = {
-            "font": ("Arial", 12),
-            "bg": "#F0F0F0"
-        }
+        # Logo o título en la parte superior
+        self.label_logo = tk.Label(self, text="Beef Point", font=("Helvetica", 24, "bold"), bg="#2C3E50", fg="white")
+        self.label_logo.pack(pady=20)
 
+        # Estilo de los campos de entrada
         entry_style = {
-            "font": ("Arial", 12),
+            "font": ("Helvetica", 12),
             "bd": 2,
-            "relief": "groove"
+            "relief": "flat",
+            "highlightthickness": 1,
+            "highlightcolor": "#1ABC9C",
+            "highlightbackground": "#34495E"
         }
 
-        # Estilo del botón de inicio de sesión
-        button_style = {
-            "font": ("Arial", 12, "bold"),
-            "bg": "#4CAF50",  # Color verde suave
-            "fg": "white",  # Color de texto blanco
-            "activebackground": "#45A049",
-            "bd": 0,
-            "relief": "flat",
-            "width": 15,
-            "height": 2
+        # Estilo de las etiquetas
+        label_style = {
+            "font": ("Helvetica", 12, "bold"),
+            "bg": "#2C3E50",
+            "fg": "white"
         }
 
         # Usuario
         self.label_usuario = tk.Label(self, text="Usuario", **label_style)
         self.label_usuario.pack(pady=5)
         self.entry_usuario = tk.Entry(self, **entry_style)
-        self.entry_usuario.pack(pady=5)
+        self.entry_usuario.pack(pady=5, padx=40)
 
         # Contraseña
         self.label_password = tk.Label(self, text="Contraseña", **label_style)
         self.label_password.pack(pady=5)
         self.entry_password = tk.Entry(self, show="*", **entry_style)
-        self.entry_password.pack(pady=5)
+        self.entry_password.pack(pady=5, padx=40)
 
-        # Botón de inicio de sesión
-        self.button_login = tk.Button(self, text="Iniciar Sesión", command=self.login, **button_style)
+        # Estilo del botón de inicio de sesión
+        self.button_login = tk.Button(self, text="Iniciar Sesión", command=self.login,
+                                      font=("Helvetica", 12, "bold"),
+                                      bg="#1ABC9C", fg="white",
+                                      activebackground="#16A085",
+                                      bd=0, relief="flat", cursor="hand2")
         self.button_login.pack(pady=20)
+        self.button_login.bind("<Enter>", lambda e: self.button_login.config(bg="#16A085"))
+        self.button_login.bind("<Leave>", lambda e: self.button_login.config(bg="#1ABC9C"))
 
     def center_window(self):
         """Centrar la ventana en la pantalla."""

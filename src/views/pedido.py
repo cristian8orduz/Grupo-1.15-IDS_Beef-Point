@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from controllers.mesa_controller import get_all_mesas
 from controllers.pedido_controller import create_pedido
 from views.producto_seleccion import ProductoSeleccionView
@@ -9,7 +10,7 @@ class PedidoView(tk.Toplevel):
         super().__init__(parent)
         self.title("Nuevo Pedido - Beef Point")
         self.geometry("400x300")
-        self.configure(bg="#F0F0F0")  # Fondo suave
+        self.configure(bg="#2C3E50")  # Fondo oscuro y profesional
 
         # Centrar la ventana
         self.center_window()
@@ -21,32 +22,37 @@ class PedidoView(tk.Toplevel):
         self.trabajador = trabajador
 
         # Estilo para etiquetas y entradas
-        label_style = {"font": ("Arial", 12), "bg": "#F0F0F0"}
+        label_style = {"font": ("Helvetica", 12, "bold"), "bg": "#2C3E50", "fg": "white"}
+        combobox_style = {"font": ("Helvetica", 12)}  # Sin opciones de color que no soporta ttk.Combobox
+
+        # Estilo del botón
         button_style = {
-            "font": ("Arial", 12, "bold"),
-            "bg": "#4CAF50",
+            "font": ("Helvetica", 12, "bold"),
+            "bg": "#1ABC9C",
             "fg": "white",
-            "activebackground": "#45A049",
+            "activebackground": "#16A085",
             "bd": 0,
             "relief": "flat",
             "width": 20,
-            "height": 2
+            "height": 2,
+            "cursor": "hand2"
         }
 
         # Label para seleccionar mesa
         self.label_mesa = tk.Label(self, text="Seleccione la Mesa:", **label_style)
-        self.label_mesa.pack(pady=10)
+        self.label_mesa.pack(pady=20)
 
         self.mesas = get_all_mesas()  # Cargar todas las mesas disponibles
         self.mesa_var = tk.StringVar(self)
         self.mesa_var.set("Seleccionar Mesa")
 
-        self.mesa_dropdown = tk.OptionMenu(self, self.mesa_var, *[mesa.numero for mesa in self.mesas])
-        self.mesa_dropdown.configure(font=("Arial", 12))
+        # Dropdown personalizado (sin bg y fg, ya que ttk.Combobox no las soporta)
+        self.mesa_dropdown = ttk.Combobox(self, textvariable=self.mesa_var, values=[mesa.numero for mesa in self.mesas], **combobox_style)
         self.mesa_dropdown.pack(pady=10)
 
+        # Botón para crear el pedido
         self.button_crear_pedido = tk.Button(self, text="Crear Pedido", command=self.crear_pedido, **button_style)
-        self.button_crear_pedido.pack(pady=20)
+        self.button_crear_pedido.pack(pady=30)
 
     def center_window(self):
         """Centrar la ventana en la pantalla."""
