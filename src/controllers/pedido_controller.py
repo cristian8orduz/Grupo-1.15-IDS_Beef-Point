@@ -109,11 +109,28 @@ def delete_pedido(pedido_id):
 def update_producto_cantidad(pedido_id, producto_id, nueva_cantidad):
     conn = connect()
     cursor = conn.cursor()
+
+    # Verificar si ya existe un detalle para el producto y pedido
     cursor.execute("""
-        UPDATE pedido_detalle 
-        SET cantidad = ? 
+        SELECT cantidad FROM pedido_detalle 
         WHERE pedido_id = ? AND producto_id = ?
-    """, (nueva_cantidad, pedido_id, producto_id))
+    """, (pedido_id, producto_id))
+    existing = cursor.fetchone()
+
+    if existing:
+        # Si existe, actualizar la cantidad
+        cursor.execute("""
+            UPDATE pedido_detalle 
+            SET cantidad = ? 
+            WHERE pedido_id = ? AND producto_id = ?
+        """, (nueva_cantidad, pedido_id, producto_id))
+    else:
+        # Si no existe, insertar un nuevo registro
+        cursor.execute("""
+            INSERT INTO pedido_detalle (pedido_id, producto_id, cantidad) 
+            VALUES (?, ?, ?)
+        """, (pedido_id, producto_id, nueva_cantidad))
+
     conn.commit()
     conn.close()
 

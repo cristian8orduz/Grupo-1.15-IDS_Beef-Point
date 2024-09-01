@@ -19,7 +19,7 @@ class LoginView(tk.Toplevel):
         self.iconbitmap(icon_path)
 
         # Logo o título en la parte superior
-        self.label_logo = tk.Label(self, text="Beef Point", font=("Helvetica", 24, "bold"), bg="#2C3E50", fg="white")
+        self.label_logo = tk.Label(self, text="Beef Point", font=("Helvetica", 24, "bold"), bg="#2C3E50", fg="#218ff9")
         self.label_logo.pack(pady=20)
 
         # Estilo de los campos de entrada
@@ -28,7 +28,7 @@ class LoginView(tk.Toplevel):
             "bd": 2,
             "relief": "flat",
             "highlightthickness": 1,
-            "highlightcolor": "#1ABC9C",
+            "highlightcolor": "#218ff9",
             "highlightbackground": "#34495E"
         }
 
@@ -54,12 +54,12 @@ class LoginView(tk.Toplevel):
         # Estilo del botón de inicio de sesión
         self.button_login = tk.Button(self, text="Iniciar Sesión", command=self.login,
                                       font=("Helvetica", 12, "bold"),
-                                      bg="#1ABC9C", fg="white",
-                                      activebackground="#16A085",
+                                      bg="#218ff9", fg="white",
+                                      activebackground="#1b73c8",
                                       bd=0, relief="flat", cursor="hand2")
         self.button_login.pack(pady=20)
-        self.button_login.bind("<Enter>", lambda e: self.button_login.config(bg="#16A085"))
-        self.button_login.bind("<Leave>", lambda e: self.button_login.config(bg="#1ABC9C"))
+        self.button_login.bind("<Enter>", lambda e: self.button_login.config(bg="#1b73c8"))
+        self.button_login.bind("<Leave>", lambda e: self.button_login.config(bg="#218ff9"))
 
     def center_window(self):
         """Centrar la ventana en la pantalla."""

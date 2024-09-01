@@ -27,9 +27,9 @@ class PedidoDomicilioView(tk.Toplevel):
         # Estilo del botón
         button_style = {
             "font": ("Helvetica", 12, "bold"),
-            "bg": "#1ABC9C",
+            "bg": "#218ff9",
             "fg": "white",
-            "activebackground": "#16A085",
+            "activebackground": "#1c68b1",
             "bd": 0,
             "relief": "flat",
             "width": 20,

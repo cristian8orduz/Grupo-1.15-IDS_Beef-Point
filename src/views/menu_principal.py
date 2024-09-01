@@ -36,9 +36,9 @@ class MenuPrincipalView(tk.Toplevel):
 
         button_style = {
             "font": ("Helvetica", 14, "bold"),
-            "bg": "#1ABC9C",  # Color verde agua moderno
+            "bg": "#218ff9",  # Color verde agua moderno
             "fg": "white",  # Color de texto blanco
-            "activebackground": "#16A085",
+            "activebackground": "#1b6dbc",
             "bd": 0,
             "relief": "flat",
             "width": 25,

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from controllers.categoria_controller import get_all_categorias
 from controllers.producto_controller import get_productos_by_categoria
-from controllers.pedido_controller import add_producto_to_pedido
+from controllers.pedido_controller import update_producto_cantidad, get_detalle_by_pedido
 from views.resumen_pedido import ResumenPedidoView
 import os
 
@@ -10,7 +10,7 @@ class ProductoSeleccionView(tk.Toplevel):
     def __init__(self, parent, pedido_id):
         super().__init__(parent)
         self.title("Seleccionar Productos - Beef Point")
-        self.geometry("600x700")
+        self.geometry("600x500")
         self.configure(bg="#34495E")  # Fondo oscuro profesional
 
         # Centrar la ventana
@@ -22,14 +22,15 @@ class ProductoSeleccionView(tk.Toplevel):
 
         self.pedido_id = pedido_id
         self.categorias = get_all_categorias()
+        self.productos_seleccionados = {}  # Almacenar productos seleccionados con sus cantidades
 
         # Estilo para etiquetas y botones
         label_style = {"font": ("Helvetica", 14, "bold"), "bg": "#34495E", "fg": "white"}
         button_style = {
             "font": ("Helvetica", 12, "bold"),
-            "bg": "#1ABC9C",
+            "bg": "#218ff9",
             "fg": "white",
-            "activebackground": "#16A085",
+            "activebackground": "#1d71c2",
             "bd": 0,
             "relief": "flat",
             "cursor": "hand2"
@@ -100,31 +101,32 @@ class ProductoSeleccionView(tk.Toplevel):
         label.pack(side=tk.LEFT, padx=15)
 
         cantidad_var = tk.IntVar()
-        cantidad_var.set(0)
+        cantidad_var.set(self.productos_seleccionados.get(producto.id, 0))  # Inicializar con la cantidad actual o 0
 
-        minus_button = tk.Button(frame, text="-", command=lambda: self.actualizar_cantidad(cantidad_var, -1), font=("Helvetica", 12), width=2)
+        minus_button = tk.Button(frame, text="-", command=lambda: self.actualizar_cantidad(producto.id, cantidad_var, -1), font=("Helvetica", 12), width=2)
         minus_button.pack(side=tk.LEFT)
 
         cantidad_label = tk.Label(frame, textvariable=cantidad_var, font=("Helvetica", 12), width=4, anchor='center', bg="#34495E", fg="white")
         cantidad_label.pack(side=tk.LEFT, padx=10)
 
-        plus_button = tk.Button(frame, text="+", command=lambda: self.actualizar_cantidad(cantidad_var, 1), font=("Helvetica", 12), width=2)
+        plus_button = tk.Button(frame, text="+", command=lambda: self.actualizar_cantidad(producto.id, cantidad_var, 1), font=("Helvetica", 12), width=2)
         plus_button.pack(side=tk.LEFT)
 
-        add_button = tk.Button(frame, text="Añadir", command=lambda: self.add_producto(producto.id, cantidad_var.get()), font=("Helvetica", 12))
-        add_button.pack(side=tk.LEFT, padx=15)
+    def actualizar_cantidad(self, producto_id, var, delta):
+        nueva_cantidad = max(0, var.get() + delta)
+        var.set(nueva_cantidad)
 
-    def actualizar_cantidad(self, var, delta):
-        var.set(max(0, var.get() + delta))
-
-    def add_producto(self, producto_id, cantidad):
-        if cantidad > 0:
-            add_producto_to_pedido(self.pedido_id, producto_id, cantidad)
-            tk.messagebox.showinfo("Éxito", "Producto añadido al pedido.")
-        else:
-            tk.messagebox.showerror("Error", "La cantidad debe ser mayor que cero.")
+        # Actualizar o eliminar la cantidad en el pedido
+        if nueva_cantidad > 0:
+            self.productos_seleccionados[producto_id] = nueva_cantidad
+        elif producto_id in self.productos_seleccionados:
+            del self.productos_seleccionados[producto_id]
 
     def terminar_pedido(self):
+        # Guardar todas las cantidades actualizadas en el pedido
+        for producto_id, cantidad in self.productos_seleccionados.items():
+            update_producto_cantidad(self.pedido_id, producto_id, cantidad)
+        
         # Mostrar resumen del pedido para confirmarlo
         resumen_view = ResumenPedidoView(self.master, self.pedido_id)
         resumen_view.lift()  # Traer la ventana al frente

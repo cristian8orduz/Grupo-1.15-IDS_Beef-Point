@@ -6,7 +6,7 @@ class ResumenPedidoView(tk.Toplevel):
     def __init__(self, parent, pedido_id):
         super().__init__(parent)
         self.title("Resumen del Pedido - Beef Point")
-        self.geometry("550x550")
+        self.geometry("550x500")
         self.configure(bg="#2C3E50")  # Fondo oscuro para un diseño más profesional
 
         # Centrar la ventana
@@ -25,39 +25,66 @@ class ResumenPedidoView(tk.Toplevel):
         entry_style = {"font": ("Helvetica", 12), "bd": 2, "relief": "solid"}
         button_style = {
             "font": ("Helvetica", 12, "bold"),
-            "bg": "#1ABC9C",
+            "bg": "#218ff9",
             "fg": "white",
-            "activebackground": "#16A085",
+            "activebackground": "#1d71c2",
             "bd": 0,
             "relief": "flat",
             "cursor": "hand2",
-            "width": 20,
+            "width": 47,
             "height": 2
         }
+
+        title_style = {"font": ("Helvetica", 16, "bold"), "bg": "#2C3E50", "fg": "#218ff9"}
 
         self.label_resumen = tk.Label(self, text="Resumen del Pedido", **label_style)
         self.label_resumen.pack(pady=20)
 
-        self.resumen_frame = tk.Frame(self, bg="#34495E", bd=2, relief="solid")
+        # Crear un Canvas para permitir el scroll
+        self.canvas = tk.Canvas(self, bg="#2C3E50")
+        self.scrollbar = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = tk.Frame(self.canvas, bg="#2C3E50")
+
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+
+        # Habilitar el scroll con la rueda del ratón
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+        self.resumen_frame = tk.Frame(self.scrollable_frame, bg="#34495E", bd=2, relief="solid")
         self.resumen_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
         # Mostrar campos de cliente solo si el pedido es a domicilio
         if self.pedido.direccion or self.pedido.numero_contacto or self.pedido.nombre_cliente:
-            self.label_nombre_cliente = tk.Label(self, text="Nombre del Cliente:", **label_style)
+            
+            self.label_datos_cliente = tk.Label(self.scrollable_frame, text="Datos del Cliente", **title_style)
+            self.label_datos_cliente.pack(pady=15)
+
+            self.label_nombre_cliente = tk.Label(self.scrollable_frame, text="Nombre del Cliente:", **label_style)
             self.label_nombre_cliente.pack(pady=5)
-            self.entry_nombre_cliente = tk.Entry(self, **entry_style)
+            self.entry_nombre_cliente = tk.Entry(self.scrollable_frame, **entry_style)
             self.entry_nombre_cliente.insert(0, self.pedido.nombre_cliente)
             self.entry_nombre_cliente.pack(pady=5, fill=tk.X, padx=20)
 
-            self.label_direccion = tk.Label(self, text="Dirección:", **label_style)
+            self.label_direccion = tk.Label(self.scrollable_frame, text="Dirección:", **label_style)
             self.label_direccion.pack(pady=5)
-            self.entry_direccion = tk.Entry(self, **entry_style)
+            self.entry_direccion = tk.Entry(self.scrollable_frame, **entry_style)
             self.entry_direccion.insert(0, self.pedido.direccion)
             self.entry_direccion.pack(pady=5, fill=tk.X, padx=20)
 
-            self.label_contacto = tk.Label(self, text="Número de Contacto:", **label_style)
+            self.label_contacto = tk.Label(self.scrollable_frame, text="Número de Contacto:", **label_style)
             self.label_contacto.pack(pady=5)
-            self.entry_contacto = tk.Entry(self, **entry_style)
+            self.entry_contacto = tk.Entry(self.scrollable_frame, **entry_style)
             self.entry_contacto.insert(0, self.pedido.numero_contacto)
             self.entry_contacto.pack(pady=5, fill=tk.X, padx=20)
         else:
@@ -68,10 +95,10 @@ class ResumenPedidoView(tk.Toplevel):
 
         self.mostrar_resumen()
 
-        self.button_confirmar = tk.Button(self, text="Confirmar Pedido", command=self.confirmar_pedido, **button_style)
+        self.button_confirmar = tk.Button(self.scrollable_frame, text="Confirmar Pedido", command=self.confirmar_pedido, **button_style)
         self.button_confirmar.pack(pady=20)
 
-        self.button_cancelar = tk.Button(self, text="Cancelar Pedido", command=self.cancelar_pedido, **button_style)
+        self.button_cancelar = tk.Button(self.scrollable_frame, text="Cancelar Pedido", command=self.cancelar_pedido, **button_style)
         self.button_cancelar.pack(pady=10)
 
     def center_window(self):
@@ -110,3 +137,6 @@ class ResumenPedidoView(tk.Toplevel):
         cancelar_pedido(self.pedido_id)
         tk.messagebox.showinfo("Información", "Pedido cancelado.")
         self.destroy()
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
