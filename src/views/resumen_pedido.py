@@ -58,7 +58,7 @@ class ResumenPedidoView(tk.Toplevel):
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
 
-        # Habilitar el scroll con la rueda del ratón
+        # Habilitar el scroll con la rueda del ratón en cualquier parte del canvas
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
 
         self.resumen_frame = tk.Frame(self.scrollable_frame, bg="#34495E", bd=2, relief="solid")
@@ -139,4 +139,6 @@ class ResumenPedidoView(tk.Toplevel):
         self.destroy()
 
     def _on_mousewheel(self, event):
-        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        """Desplazamiento con la rueda del ratón solo si el canvas es válido"""
+        if self.canvas.winfo_exists():
+            self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
