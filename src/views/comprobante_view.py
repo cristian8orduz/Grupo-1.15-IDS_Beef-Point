@@ -1,21 +1,22 @@
 import tkinter as tk
 from tkinter import messagebox
 from controllers.pedido_controller import validar_comprobante_y_enviar_captura, confirmar_comprobante_cliente, get_pedido, get_detalle_by_pedido
-from PIL import Image, ImageDraw, ImageFont  # Para la generación del comprobante en formato JPG
+from controllers.producto_controller import get_precio_producto
+from PIL import Image, ImageDraw, ImageFont
 import os
 
 class ComprobanteView(tk.Toplevel):
     def __init__(self, parent, pedido_id):
         super().__init__(parent)
-        self.title("Gestionar Comprobante - Beef Point")
-        self.geometry("400x400")
+        self.title("Gestión de Comprobante - Beef Point")
+        self.geometry("600x400")
         self.configure(bg="#2C3E50")
 
         self.pedido_id = pedido_id
         self.pedido = get_pedido(self.pedido_id)
         self.tiempo_var = tk.StringVar(value="15")  # Tiempo predeterminado en minutos
 
-        # Centramos la ventana
+        # Centrar la ventana
         self.center_window()
 
         # Establecer el icono de la ventana
@@ -45,8 +46,8 @@ class ComprobanteView(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Mostrar título
-        title_label = tk.Label(self.frame, text="Gestión de Comprobante", font=("Helvetica", 16, "bold"), bg="#2C3E50", fg="white")
-        title_label.pack(pady=10)
+        title_label = tk.Label(self.frame, text="Gestión de Comprobante", font=("Helvetica", 18, "bold"), bg="#2C3E50", fg="white")
+        title_label.pack(pady=15)
 
         # Mostrar detalles del pedido
         self.mostrar_detalles_pedido()
@@ -58,11 +59,11 @@ class ComprobanteView(tk.Toplevel):
         self.tiempo_entry.pack(pady=5)
 
         # Botón para validar y generar la captura
-        enviar_button = tk.Button(self.frame, text="Validar y Enviar Captura", command=self.enviar_captura, bg="#27AE60", fg="white", font=("Helvetica", 12, "bold"))
+        enviar_button = tk.Button(self.frame, text="Validar y Enviar Captura", command=self.enviar_captura, bg="#27AE60", fg="white", font=("Helvetica", 12, "bold"), width=25)
         enviar_button.pack(pady=10)
 
         # Botón para confirmar el comprobante si el cliente está de acuerdo
-        confirmar_button = tk.Button(self.frame, text="Confirmar Comprobante", command=self.confirmar_comprobante, bg="#218ff9", fg="white", font=("Helvetica", 12, "bold"))
+        confirmar_button = tk.Button(self.frame, text="Confirmar Comprobante", command=self.confirmar_comprobante, bg="#218ff9", fg="white", font=("Helvetica", 12, "bold"), width=25)
         confirmar_button.pack(pady=10)
 
     def center_window(self):
@@ -75,37 +76,40 @@ class ComprobanteView(tk.Toplevel):
         self.geometry(f'{width}x{height}+{x}+{y}')
 
     def mostrar_detalles_pedido(self):
-        """Mostrar detalles del pedido: Si no hay mesa, mostrar los detalles del cliente."""
         detalles = ""
+        total = 0
 
-        # Verificamos si el pedido tiene mesa asignada o es un pedido a domicilio
         if self.pedido.mesa_id is None:
-            # Si no hay mesa, mostrar la información del cliente
             detalles += f"Cliente: {self.pedido.nombre_cliente}\n"
             detalles += f"Dirección: {self.pedido.direccion}\n"
             detalles += f"Teléfono: {self.pedido.numero_contacto}\n"
         else:
-            # Si hay mesa, mostrar la información de la mesa
             detalles += f"Mesa: {self.pedido.mesa_id}\n"
 
         detalles += "\nDetalles del Pedido:\n"
-        
-        # Obtener los detalles del pedido
         detalles_pedido = get_detalle_by_pedido(self.pedido_id)
+
+        # Mostrar cada detalle con letra más pequeña
         for detalle in detalles_pedido:
             producto_id, producto_nombre, categoria_nombre, cantidad = detalle
-            detalles += f"- {categoria_nombre} - {producto_nombre} x {cantidad}\n"
+            precio = get_precio_producto(producto_id)
+            total_producto = cantidad * precio
+            total += total_producto
+            detalles += f"- {categoria_nombre} - {producto_nombre} x {cantidad} (${total_producto:,.0f})\n"
 
-        # Mostrar los detalles en la interfaz
         detalles_label = tk.Label(self.frame, text=detalles, font=("Helvetica", 12), bg="#2C3E50", fg="white", justify=tk.LEFT)
         detalles_label.pack(pady=10)
+
+        # Mostrar el total con letra más grande y en negrita
+        total_label = tk.Label(self.frame, text=f"\nTotal: ${total:,.0f}", font=("Helvetica", 14, "bold"), bg="#2C3E50", fg="white")
+        total_label.pack(pady=5)
 
     def enviar_captura(self):
         """Generar y guardar el comprobante como una imagen JPG."""
         tiempo_estimado = self.tiempo_var.get()
 
         # Crear la imagen del comprobante
-        imagen = Image.new('RGB', (400, 300), color=(73, 109, 137))
+        imagen = Image.new('RGB', (600, 400), color=(73, 109, 137))
         d = ImageDraw.Draw(imagen)
         font = ImageFont.load_default()
 
@@ -115,11 +119,17 @@ class ComprobanteView(tk.Toplevel):
             texto_comprobante += f"Cliente: {self.pedido.nombre_cliente}\nDirección: {self.pedido.direccion}\nTeléfono: {self.pedido.numero_contacto}\n"
         texto_comprobante += f"Tiempo estimado de llegada: {tiempo_estimado} minutos\n"
         texto_comprobante += "Detalles del Pedido:\n"
-        
+
         detalles_pedido = get_detalle_by_pedido(self.pedido_id)
+        total = 0
         for detalle in detalles_pedido:
             producto_id, producto_nombre, categoria_nombre, cantidad = detalle
-            texto_comprobante += f"- {categoria_nombre} - {producto_nombre} x {cantidad}\n"
+            precio = get_precio_producto(producto_id)
+            total_producto = cantidad * precio
+            total += total_producto
+            texto_comprobante += f"- {categoria_nombre} - {producto_nombre} x {cantidad} (${total_producto:,.0f})\n"
+
+        texto_comprobante += f"\nTotal: ${total:,.0f}"
 
         d.text((10, 10), texto_comprobante, fill=(255, 255, 255), font=font)
 

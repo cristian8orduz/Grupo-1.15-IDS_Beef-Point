@@ -5,6 +5,7 @@ from controllers.pedido_controller import get_pedidos_pendientes
 from views.historial_pedidos import HistorialPedidosView
 from views.login import LoginView 
 from views.pedido_domicilio import PedidoDomicilioView
+from views.admin_productos import AdminProductosView
 import os
 
 class MenuPrincipalView(tk.Toplevel):
@@ -35,14 +36,14 @@ class MenuPrincipalView(tk.Toplevel):
         button_frame.pack(expand=True)
 
         button_style = {
-            "font": ("Helvetica", 14, "bold"),
+            "font": ("Helvetica", 12, "bold"),
             "bg": "#218ff9",  # Color verde agua moderno
             "fg": "white",  # Color de texto blanco
             "activebackground": "#1b6dbc",
             "bd": 0,
             "relief": "flat",
             "width": 25,
-            "height": 2,
+            "height": 1,
             "cursor": "hand2"
         }
 
@@ -54,6 +55,9 @@ class MenuPrincipalView(tk.Toplevel):
 
         self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
         self.button_historial_pedidos.pack(pady=10)
+
+        self.button_admin_productos = tk.Button(button_frame, text="Administrar Productos", command=self.admin_productos, **button_style)
+        self.button_admin_productos.pack(pady=10)
 
         self.button_cerrar_sesion = tk.Button(button_frame, text="Cerrar Sesión", command=self.cerrar_sesion, **button_style)
         self.button_cerrar_sesion.pack(pady=10)
@@ -82,6 +86,9 @@ class MenuPrincipalView(tk.Toplevel):
 
     def ver_historial(self):
         HistorialPedidosView(self)
+
+    def admin_productos(self):
+        AdminProductosView(self)
 
     def cerrar_sesion(self):
         self.destroy()  # Cierra la ventana del menú principal

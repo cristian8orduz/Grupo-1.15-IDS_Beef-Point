@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from controllers.pedido_controller import get_pedidos_confirmados, delete_pedido
+from controllers.producto_controller import get_precio_producto
 from views.editar_pedido import EditarPedidoView
 from views.comprobante_view import ComprobanteView
 import os
@@ -67,12 +68,21 @@ class HistorialPedidosView(tk.Toplevel):
             detalles_label = tk.Label(self.frame, text=f"{mesa_o_domicilio}, Trabajador: {trabajador}", font=("Helvetica", 12), fg="#BDC3C7", bg="#2C3E50")
             detalles_label.pack(anchor="w", padx=20, pady=5)
 
-            # Mostrar detalles del pedido
-            for producto, cantidad in detalles[pedido_id]:
-                detalle_label = tk.Label(self.frame, text=f"  - {producto}: {cantidad}", font=("Helvetica", 11), fg="#ECF0F1", bg="#2C3E50")
+            total_pedido = 0  # Inicializamos el total para cada pedido
+
+            # Mostrar detalles del pedido y calcular el total
+            for producto_id, producto_nombre, cantidad in detalles[pedido_id]:
+                precio_producto = get_precio_producto(producto_id)  # Obtener el precio usando el ID del producto
+                total_producto = precio_producto * cantidad
+                total_pedido += total_producto  # Sumamos al total del pedido
+                detalle_label = tk.Label(self.frame, text=f"  - {producto_nombre}: {cantidad} (${total_producto:,.0f})", font=("Helvetica", 11), fg="#ECF0F1", bg="#2C3E50")
                 detalle_label.pack(anchor="w", padx=30)
 
-            # Botones de Editar y Eliminar
+            # Mostrar el total del pedido
+            total_label = tk.Label(self.frame, text=f"Total: ${total_pedido:,.0f}", font=("Helvetica", 12, "bold"), fg="#ECF0F1", bg="#2C3E50")
+            total_label.pack(anchor="w", padx=30, pady=5)
+
+            # Botones de Editar, Eliminar y Comprobante
             button_frame = tk.Frame(self.frame, bg="#2C3E50")
             button_frame.pack(anchor="w", padx=20, pady=5)
 

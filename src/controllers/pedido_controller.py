@@ -32,6 +32,30 @@ def get_pedido(pedido_id):
         return Pedido(*row)  # Asegúrate de que el objeto Pedido incluya todos estos campos
     return None
 
+def get_pedidos():
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.id, p.mesa_id, t.nombre, p.nombre_cliente, p.direccion
+        FROM pedidos p
+        JOIN trabajadores t ON p.trabajador_id = t.id
+    """)
+    pedidos = cursor.fetchall()
+
+    detalles = {}
+    for pedido in pedidos:
+        pedido_id = pedido[0]
+        cursor.execute("""
+            SELECT pr.id, pr.nombre, pd.cantidad
+            FROM pedido_detalle pd
+            JOIN productos pr ON pd.producto_id = pr.id
+            WHERE pd.pedido_id = ?
+        """, (pedido_id,))
+        detalles[pedido_id] = cursor.fetchall()
+
+    conn.close()
+    return pedidos, detalles
+
 def get_pedidos_pendientes():
     conn = connect()
     cursor = conn.cursor()
@@ -92,8 +116,9 @@ def get_pedidos_confirmados():
     detalles = {}
     for pedido in pedidos:
         pedido_id = pedido[0]
+        # Modificamos esta consulta para incluir el producto_id
         cursor.execute("""
-            SELECT pr.nombre, pd.cantidad
+            SELECT pr.id, pr.nombre, pd.cantidad
             FROM pedido_detalle pd
             JOIN productos pr ON pd.producto_id = pr.id
             WHERE pd.pedido_id = ?

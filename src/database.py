@@ -38,11 +38,11 @@ def create_tables():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL,
         categoria_id INTEGER NOT NULL,
+        precio REAL NOT NULL DEFAULT 0, -- Agregar columna de precio
         FOREIGN KEY (categoria_id) REFERENCES categorias(id)
     )
     ''')
 
-    # Agregar columna tipo_pedido para identificar si es Mesa o Domicilio
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS pedidos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

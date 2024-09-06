@@ -1,5 +1,6 @@
 import tkinter as tk
 from controllers.pedido_controller import get_detalle_by_pedido, confirmar_pedido, cancelar_pedido, get_pedido, update_pedido_info
+from controllers.producto_controller import get_precio_producto
 import os
 
 class ResumenPedidoView(tk.Toplevel):
@@ -115,14 +116,23 @@ class ResumenPedidoView(tk.Toplevel):
 
     def mostrar_resumen(self):
         detalles = get_detalle_by_pedido(self.pedido_id)
+        total = 0  # Variable para calcular el total
 
         for widget in self.resumen_frame.winfo_children():
             widget.destroy()
 
         for detalle in detalles:
             producto_id, producto_nombre, categoria_nombre, cantidad = detalle
-            label = tk.Label(self.resumen_frame, text=f"{categoria_nombre} - {producto_nombre} x {cantidad}", font=("Helvetica", 12), bg="#34495E", fg="white")
+            precio = get_precio_producto(producto_id)  # Obtener el precio del producto
+            subtotal = cantidad * precio  # Calcular el subtotal
+            total += subtotal  # Sumar el subtotal al total
+
+            label = tk.Label(self.resumen_frame, text=f"{categoria_nombre} - {producto_nombre} x {cantidad} (${subtotal:,.0f})", font=("Helvetica", 12), bg="#34495E", fg="white")
             label.pack(anchor="w", padx=10, pady=5)
+
+        # Mostrar el total
+        total_label = tk.Label(self.resumen_frame, text=f"Total: ${total:,.0f}", font=("Helvetica", 14, "bold"), bg="#34495E", fg="white")
+        total_label.pack(anchor="w", padx=10, pady=10)
 
     def confirmar_pedido(self):
         # Actualizar la información del pedido solo si es a domicilio
