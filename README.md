@@ -40,12 +40,7 @@ Sigue estos pasos para clonar y ejecutar el proyecto:
     pip install -r requirements.txt
     ```
 
-4. **Crear la base de datos**:
-    ```bash
-    python database.py
-    ```
-
-5. **Ejecutar la aplicación**:
+4. **Ejecutar la aplicación**:
     ```bash
     python main.py
     ```
