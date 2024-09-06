@@ -78,8 +78,9 @@ class PedidoDomicilioView(tk.Toplevel):
         numero_contacto = self.entry_contacto.get()
 
         if nombre_cliente and direccion and numero_contacto:
-            pedido_id = create_pedido(None, self.trabajador.id, "Pendiente", direccion, numero_contacto, nombre_cliente)
+            pedido_id = create_pedido(None, self.trabajador.id, "Pendiente", direccion=direccion, numero_contacto=numero_contacto, nombre_cliente=nombre_cliente)
             self.destroy()
             ProductoSeleccionView(self.master, pedido_id)
         else:
             tk.messagebox.showerror("Error", "Debe ingresar todos los datos del domicilio.")
+

@@ -42,6 +42,7 @@ def create_tables():
     )
     ''')
 
+    # Agregar columna tipo_pedido para identificar si es Mesa o Domicilio
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS pedidos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,6 +53,7 @@ def create_tables():
         direccion TEXT,
         numero_contacto TEXT,
         nombre_cliente TEXT,
+        tipo_pedido TEXT DEFAULT 'Mesa',
         FOREIGN KEY (mesa_id) REFERENCES mesas(id),
         FOREIGN KEY (trabajador_id) REFERENCES trabajadores(id)
     )
@@ -65,6 +67,18 @@ def create_tables():
         cantidad INTEGER NOT NULL,
         FOREIGN KEY (pedido_id) REFERENCES pedidos(id),
         FOREIGN KEY (producto_id) REFERENCES productos(id)
+    )
+    ''')
+
+   # Crear tabla para registrar comprobantes de pedidos de domicilio o mesa
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS comprobantes_domicilio (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pedido_id INTEGER NOT NULL,
+        fecha_hora TEXT NOT NULL,
+        estado_comprobante TEXT NOT NULL,
+        captura_enviada_cliente TEXT,
+        FOREIGN KEY (pedido_id) REFERENCES pedidos(id)
     )
     ''')
 

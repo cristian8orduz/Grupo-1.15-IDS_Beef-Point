@@ -73,22 +73,25 @@ class ResumenPedidoView(tk.Toplevel):
             self.label_nombre_cliente = tk.Label(self.scrollable_frame, text="Nombre del Cliente:", **label_style)
             self.label_nombre_cliente.pack(pady=5)
             self.entry_nombre_cliente = tk.Entry(self.scrollable_frame, **entry_style)
-            self.entry_nombre_cliente.insert(0, self.pedido.nombre_cliente)
             self.entry_nombre_cliente.pack(pady=5, fill=tk.X, padx=20)
+            if self.pedido.nombre_cliente:
+                self.entry_nombre_cliente.insert(0, self.pedido.nombre_cliente)
+
 
             self.label_direccion = tk.Label(self.scrollable_frame, text="Dirección:", **label_style)
             self.label_direccion.pack(pady=5)
             self.entry_direccion = tk.Entry(self.scrollable_frame, **entry_style)
-            self.entry_direccion.insert(0, self.pedido.direccion)
             self.entry_direccion.pack(pady=5, fill=tk.X, padx=20)
+            if self.pedido.direccion:
+                self.entry_direccion.insert(0, self.pedido.direccion)
 
             self.label_contacto = tk.Label(self.scrollable_frame, text="Número de Contacto:", **label_style)
             self.label_contacto.pack(pady=5)
             self.entry_contacto = tk.Entry(self.scrollable_frame, **entry_style)
-            self.entry_contacto.insert(0, self.pedido.numero_contacto)
             self.entry_contacto.pack(pady=5, fill=tk.X, padx=20)
+            if self.pedido.numero_contacto:
+                self.entry_contacto.insert(0, self.pedido.numero_contacto)
         else:
-            # Si no es un pedido a domicilio, no mostrar estos campos y saltar a mostrar el resumen del pedido
             self.entry_nombre_cliente = None
             self.entry_direccion = None
             self.entry_contacto = None

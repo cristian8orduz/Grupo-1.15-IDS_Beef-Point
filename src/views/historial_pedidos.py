@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from controllers.pedido_controller import get_pedidos_confirmados, delete_pedido
 from views.editar_pedido import EditarPedidoView
+from views.comprobante_view import ComprobanteView
 import os
 
 class HistorialPedidosView(tk.Toplevel):
@@ -75,6 +76,9 @@ class HistorialPedidosView(tk.Toplevel):
             button_frame = tk.Frame(self.frame, bg="#2C3E50")
             button_frame.pack(anchor="w", padx=20, pady=5)
 
+            comprobante_button = tk.Button(button_frame, text="Comprobante", command=lambda pid=pedido_id: self.mostrar_comprobante(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+            comprobante_button.pack(side="left", padx=5)
+
             edit_button = tk.Button(button_frame, text="Editar", command=lambda pid=pedido_id: self.editar_pedido(pid), bg="#218ff9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
             edit_button.pack(side="left", padx=5)
 
@@ -101,4 +105,10 @@ class HistorialPedidosView(tk.Toplevel):
         if tk.messagebox.askyesno("Confirmar", "¿Estás seguro de que quieres eliminar este pedido?"):
             delete_pedido(pedido_id)
             tk.messagebox.showinfo("Éxito", "Pedido eliminado.")
+            self.mostrar_historial()
+
+    def mostrar_comprobante(self, pedido_id):
+            ComprobanteView(self, pedido_id)
+            # Actualizar el historial de pedidos después de cerrar la ventana de edición
+            self.wait_window(self.winfo_children()[-1])
             self.mostrar_historial()

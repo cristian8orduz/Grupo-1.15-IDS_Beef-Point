@@ -5,13 +5,14 @@ from models.pedido_detalle import PedidoDetalle
 from models.categoria import Categoria  # Asegúrate de importar la clase Categoria
 from models.producto import Producto
 
-def create_pedido(mesa_id, trabajador_id, estado, direccion=None, numero_contacto=None, nombre_cliente=None):
+# Crear pedido con tipo de pedido (Mesa o Domicilio)
+def create_pedido(mesa_id, trabajador_id, estado, tipo_pedido='Mesa', direccion=None, numero_contacto=None, nombre_cliente=None):
     conn = connect()
     cursor = conn.cursor()
     cursor.execute('''
-    INSERT INTO pedidos (mesa_id, trabajador_id, fecha_hora, estado, direccion, numero_contacto, nombre_cliente) 
-    VALUES (?, ?, datetime('now'), ?, ?, ?, ?)
-    ''', (mesa_id, trabajador_id, estado, direccion, numero_contacto, nombre_cliente))
+    INSERT INTO pedidos (mesa_id, trabajador_id, fecha_hora, estado, direccion, numero_contacto, nombre_cliente, tipo_pedido)
+    VALUES (?, ?, datetime('now'), ?, ?, ?, ?, ?)
+    ''', (mesa_id, trabajador_id, estado, direccion, numero_contacto, nombre_cliente, tipo_pedido))
     pedido_id = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -20,11 +21,15 @@ def create_pedido(mesa_id, trabajador_id, estado, direccion=None, numero_contact
 def get_pedido(pedido_id):
     conn = connect()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM pedidos WHERE id = ?", (pedido_id,))
+    cursor.execute("""
+        SELECT id, mesa_id, trabajador_id, fecha_hora, estado, direccion, numero_contacto, nombre_cliente, tipo_pedido 
+        FROM pedidos WHERE id = ?
+    """, (pedido_id,))
     row = cursor.fetchone()
     conn.close()
+
     if row:
-        return Pedido(*row)
+        return Pedido(*row)  # Asegúrate de que el objeto Pedido incluya todos estos campos
     return None
 
 def get_pedidos_pendientes():
@@ -168,3 +173,73 @@ def update_pedido_info(pedido_id, nombre_cliente, direccion, numero_contacto):
     conn.commit()
     conn.close()
 
+# Nueva función para enviar comprobante de domicilio o mesa
+def enviar_comprobante(pedido_id):
+    conn = connect()
+    cursor = conn.cursor()
+
+    # Obtener el tipo de pedido (Mesa o Domicilio)
+    cursor.execute('SELECT tipo_pedido FROM pedidos WHERE id = ?', (pedido_id,))
+    tipo_pedido = cursor.fetchone()[0]
+
+    if tipo_pedido == 'Domicilio':
+        estado_comprobante = 'Enviado Domicilio'
+    else:
+        estado_comprobante = 'Enviado Mesa'
+
+    cursor.execute('''
+    INSERT INTO comprobantes_domicilio (pedido_id, fecha_hora, estado_comprobante)
+    VALUES (?, datetime('now'), ?)
+    ''', (pedido_id, estado_comprobante))
+
+    conn.commit()
+    conn.close()
+
+# Función para validar la recepción del comprobante
+def validar_comprobante(pedido_id):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute('''
+    UPDATE comprobantes_domicilio
+    SET estado_comprobante = 'Validado'
+    WHERE pedido_id = ?
+    ''', (pedido_id,))
+    conn.commit()
+    conn.close()
+
+# Confirmar el comprobante si el cliente está de acuerdo
+def confirmar_comprobante_cliente(pedido_id, cliente_acuerdo):
+    conn = connect()
+    cursor = conn.cursor()
+
+    if cliente_acuerdo:
+        # Cambiar el estado del comprobante a 'Confirmado por Cliente'
+        cursor.execute('''
+        UPDATE comprobantes_domicilio
+        SET estado_comprobante = 'Confirmado por Cliente'
+        WHERE pedido_id = ?
+        ''', (pedido_id,))
+        
+        print("Comprobante confirmado por el cliente.")
+    else:
+        print("El cliente no está de acuerdo con el comprobante.")
+    
+    conn.commit()
+    conn.close()
+
+# El trabajador valida el comprobante y envía una captura al cliente
+def validar_comprobante_y_enviar_captura(pedido_id, captura):
+    conn = connect()
+    cursor = conn.cursor()
+
+    # Cambiar el estado del comprobante a 'Enviado al Cliente'
+    cursor.execute('''
+    UPDATE comprobantes_domicilio
+    SET estado_comprobante = 'Validado por Trabajador', captura_enviada_cliente = ?
+    WHERE pedido_id = ?
+    ''', (captura, pedido_id))
+
+    conn.commit()
+    conn.close()
+
+    print("Comprobante validado y captura enviada al cliente.")

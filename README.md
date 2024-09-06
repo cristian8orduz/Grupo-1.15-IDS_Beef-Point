@@ -30,12 +30,22 @@ Sigue estos pasos para clonar y ejecutar el proyecto:
     cd beef-point-pos/src
     ```
 
-2. **Crear la base de datos**:
+2. **Entrar a Ruta Proyecto**:
+    ```bash
+    cd src
+    ```
+
+3. **Instalar Liberias**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4. **Crear la base de datos**:
     ```bash
     python database.py
     ```
 
-3. **Ejecutar la aplicación**:
+5. **Ejecutar la aplicación**:
     ```bash
     python main.py
     ```
