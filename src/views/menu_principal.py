@@ -6,6 +6,7 @@ from views.historial_pedidos import HistorialPedidosView
 from views.login import LoginView 
 from views.pedido_domicilio import PedidoDomicilioView
 from views.admin_productos import AdminProductosView
+from views.admin_trabajadores import AdminTrabajadoresView
 import os
 
 class MenuPrincipalView(tk.Toplevel):
@@ -59,15 +60,18 @@ class MenuPrincipalView(tk.Toplevel):
         self.button_admin_productos = tk.Button(button_frame, text="Administrar Productos", command=self.admin_productos, **button_style)
         self.button_admin_productos.pack(pady=10)
 
-        self.button_cerrar_sesion = tk.Button(button_frame, text="Cerrar Sesión", command=self.cerrar_sesion, **button_style)
-        self.button_cerrar_sesion.pack(pady=10)
+        self.button_admin_trabajadores = tk.Button(button_frame, text="Administrar Trabajadores", command=self.admin_trabajadores, **button_style)
+        self.button_admin_trabajadores.pack(pady=10)
 
         # Barra inferior con la información del usuario
         footer_frame = tk.Frame(self, bg="#34495E")
         footer_frame.pack(fill=tk.X, side=tk.BOTTOM)
 
         self.label_usuario = tk.Label(footer_frame, text=f"Usuario: {self.trabajador.nombre}", font=("Helvetica", 10), bg="#34495E", fg="white")
-        self.label_usuario.pack(pady=5, padx=10, anchor="w")
+        self.label_usuario.pack(side=tk.LEFT, pady=5, padx=10)
+
+        self.button_cerrar_sesion = tk.Button(footer_frame, text="Cerrar Sesión", command=self.cerrar_sesion, font=("Helvetica", 10, "bold"), bg="#E74C3C", fg="white", relief="flat", cursor="hand2")
+        self.button_cerrar_sesion.pack(side=tk.RIGHT, pady=5, padx=10)
 
     def center_window(self):
         """Centrar la ventana en la pantalla."""
@@ -89,6 +93,9 @@ class MenuPrincipalView(tk.Toplevel):
 
     def admin_productos(self):
         AdminProductosView(self)
+
+    def admin_trabajadores(self):
+        AdminTrabajadoresView(self)
 
     def cerrar_sesion(self):
         self.destroy()  # Cierra la ventana del menú principal

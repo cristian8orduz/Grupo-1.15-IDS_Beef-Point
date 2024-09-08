@@ -26,6 +26,13 @@ def update_precio_producto(producto_id, nuevo_precio):
     conn.commit()
     conn.close()
 
+def delete_producto(producto_id):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM productos WHERE id = ?", (producto_id,))
+    conn.commit()
+    conn.close()
+
 def get_precio_producto(producto_id):
     conn = connect()
     cursor = conn.cursor()

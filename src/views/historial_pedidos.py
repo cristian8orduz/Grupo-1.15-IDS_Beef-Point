@@ -61,6 +61,10 @@ class HistorialPedidosView(tk.Toplevel):
             pedido_id = pedido[0]
             mesa_o_domicilio = f"Domicilio - Cliente: {pedido[3]}, Dirección: {pedido[4]}" if pedido[1] is None else f"Mesa: {pedido[1]}"
             trabajador = pedido[2]
+            estado_comprobante = pedido[5]  # Estado del comprobante
+
+            # Verificación del estado del comprobante
+            print(f"Pedido ID: {pedido_id}, Estado Comprobante: {estado_comprobante}")
 
             pedido_label = tk.Label(self.frame, text=f"Pedido ID: {pedido_id}", font=("Helvetica", 14, "bold"), fg="#218ff9", bg="#2C3E50")
             pedido_label.pack(anchor="w", padx=10, pady=5)
@@ -68,37 +72,36 @@ class HistorialPedidosView(tk.Toplevel):
             detalles_label = tk.Label(self.frame, text=f"{mesa_o_domicilio}, Trabajador: {trabajador}", font=("Helvetica", 12), fg="#BDC3C7", bg="#2C3E50")
             detalles_label.pack(anchor="w", padx=20, pady=5)
 
-            total_pedido = 0  # Inicializamos el total para cada pedido
+            total_pedido = 0
 
-            # Mostrar detalles del pedido y calcular el total
             for producto_id, producto_nombre, cantidad in detalles[pedido_id]:
-                precio_producto = get_precio_producto(producto_id)  # Obtener el precio usando el ID del producto
+                precio_producto = get_precio_producto(producto_id)
                 total_producto = precio_producto * cantidad
-                total_pedido += total_producto  # Sumamos al total del pedido
+                total_pedido += total_producto
                 detalle_label = tk.Label(self.frame, text=f"  - {producto_nombre}: {cantidad} (${total_producto:,.0f})", font=("Helvetica", 11), fg="#ECF0F1", bg="#2C3E50")
                 detalle_label.pack(anchor="w", padx=30)
 
-            # Mostrar el total del pedido
             total_label = tk.Label(self.frame, text=f"Total: ${total_pedido:,.0f}", font=("Helvetica", 12, "bold"), fg="#ECF0F1", bg="#2C3E50")
             total_label.pack(anchor="w", padx=30, pady=5)
 
-            # Botones de Editar, Eliminar y Comprobante
             button_frame = tk.Frame(self.frame, bg="#2C3E50")
             button_frame.pack(anchor="w", padx=20, pady=5)
 
+            # Mostrar el botón de comprobante siempre
             comprobante_button = tk.Button(button_frame, text="Comprobante", command=lambda pid=pedido_id: self.mostrar_comprobante(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
             comprobante_button.pack(side="left", padx=5)
 
-            edit_button = tk.Button(button_frame, text="Editar", command=lambda pid=pedido_id: self.editar_pedido(pid), bg="#218ff9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
-            edit_button.pack(side="left", padx=5)
+            # Mostrar botones de editar y eliminar solo si el comprobante no ha sido confirmado
+            if estado_comprobante != 'Confirmado por Cliente':
+                edit_button = tk.Button(button_frame, text="Editar", command=lambda pid=pedido_id: self.editar_pedido(pid), bg="#218ff9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                edit_button.pack(side="left", padx=5)
 
-            delete_button = tk.Button(button_frame, text="Eliminar", command=lambda pid=pedido_id: self.eliminar_pedido(pid), bg="#E74C3C", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
-            delete_button.pack(side="left", padx=5)
+                delete_button = tk.Button(button_frame, text="Eliminar", command=lambda pid=pedido_id: self.eliminar_pedido(pid), bg="#E74C3C", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                delete_button.pack(side="left", padx=5)
 
             separator = tk.Label(self.frame, text="─" * 60, fg="#7F8C8D", bg="#2C3E50")
             separator.pack(pady=10)
 
-        # Reasociar el evento de scroll después de actualizar el contenido
         self.bind_scroll_event()
 
     def bind_scroll_event(self):
@@ -118,7 +121,10 @@ class HistorialPedidosView(tk.Toplevel):
             self.mostrar_historial()
 
     def mostrar_comprobante(self, pedido_id):
-            ComprobanteView(self, pedido_id)
-            # Actualizar el historial de pedidos después de cerrar la ventana de edición
-            self.wait_window(self.winfo_children()[-1])
-            self.mostrar_historial()
+        # Pasamos 'self' como parent
+        ComprobanteView(self, pedido_id)  
+        self.wait_window(self.winfo_children()[-1])
+        self.mostrar_historial()
+
+
+

@@ -106,17 +106,20 @@ def get_pedidos_confirmados():
     conn = connect()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT p.id, p.mesa_id, t.nombre, p.nombre_cliente, p.direccion
+        SELECT p.id, p.mesa_id, t.nombre, p.nombre_cliente, p.direccion, cd.estado_comprobante
         FROM pedidos p
         JOIN trabajadores t ON p.trabajador_id = t.id
+        LEFT JOIN comprobantes_domicilio cd ON p.id = cd.pedido_id
         WHERE p.estado = 'Confirmado'
     """)
     pedidos = cursor.fetchall()
 
+    for pedido in pedidos:
+        print(f"Pedido ID: {pedido[0]}, Estado Comprobante: {pedido[5]}")  # Verificación
+
     detalles = {}
     for pedido in pedidos:
         pedido_id = pedido[0]
-        # Modificamos esta consulta para incluir el producto_id
         cursor.execute("""
             SELECT pr.id, pr.nombre, pd.cantidad
             FROM pedido_detalle pd
@@ -232,25 +235,50 @@ def validar_comprobante(pedido_id):
     conn.commit()
     conn.close()
 
-# Confirmar el comprobante si el cliente está de acuerdo
+def crear_comprobante_si_no_existe(pedido_id):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM comprobantes_domicilio WHERE pedido_id = ?", (pedido_id,))
+    comprobante = cursor.fetchone()
+
+    if not comprobante:
+        cursor.execute('''
+        INSERT INTO comprobantes_domicilio (pedido_id, fecha_hora, estado_comprobante)
+        VALUES (?, datetime('now'), 'Pendiente')
+        ''', (pedido_id,))
+        conn.commit()
+
+    conn.close()
+
 def confirmar_comprobante_cliente(pedido_id, cliente_acuerdo):
+    crear_comprobante_si_no_existe(pedido_id)  # Asegurar que existe el comprobante
+
     conn = connect()
     cursor = conn.cursor()
 
     if cliente_acuerdo:
-        # Cambiar el estado del comprobante a 'Confirmado por Cliente'
         cursor.execute('''
         UPDATE comprobantes_domicilio
         SET estado_comprobante = 'Confirmado por Cliente'
         WHERE pedido_id = ?
         ''', (pedido_id,))
-        
-        print("Comprobante confirmado por el cliente.")
+        print(f"Comprobante para pedido {pedido_id} confirmado por el cliente.")
     else:
-        print("El cliente no está de acuerdo con el comprobante.")
-    
+        print(f"El cliente no está de acuerdo con el comprobante del pedido {pedido_id}.")
+
     conn.commit()
     conn.close()
+
+def comprobar_estado_comprobante(pedido_id):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("SELECT estado_comprobante FROM comprobantes_domicilio WHERE pedido_id = ?", (pedido_id,))
+    estado = cursor.fetchone()
+    conn.close()
+
+    if estado:
+        return estado[0]
+    return None
 
 # El trabajador valida el comprobante y envía una captura al cliente
 def validar_comprobante_y_enviar_captura(pedido_id, captura):

@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import messagebox
-from controllers.pedido_controller import validar_comprobante_y_enviar_captura, confirmar_comprobante_cliente, get_pedido, get_detalle_by_pedido
+from tkinter import filedialog, messagebox
+from controllers.pedido_controller import validar_comprobante_y_enviar_captura, confirmar_comprobante_cliente, get_pedido, get_detalle_by_pedido, comprobar_estado_comprobante
 from controllers.producto_controller import get_precio_producto
 from PIL import Image, ImageDraw, ImageFont
 import os
@@ -9,12 +9,17 @@ class ComprobanteView(tk.Toplevel):
     def __init__(self, parent, pedido_id):
         super().__init__(parent)
         self.title("Gestión de Comprobante - Beef Point")
-        self.geometry("600x400")
+        self.geometry("800x450")
         self.configure(bg="#2C3E50")
 
+        self.parent = parent
         self.pedido_id = pedido_id
         self.pedido = get_pedido(self.pedido_id)
         self.tiempo_var = tk.StringVar(value="15")  # Tiempo predeterminado en minutos
+        self.tipo_pago_var = tk.StringVar(value="Efectivo")
+        
+        # Inicializar variable para el comprobante subido
+        self.comprobante_subido = None
 
         # Centrar la ventana
         self.center_window()
@@ -46,7 +51,7 @@ class ComprobanteView(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
         # Mostrar título
-        title_label = tk.Label(self.frame, text="Gestión de Comprobante", font=("Helvetica", 18, "bold"), bg="#2C3E50", fg="white")
+        title_label = tk.Label(self.frame, text="Detalles de Comprobante", font=("Helvetica", 18, "bold"), bg="#2C3E50", fg="white")
         title_label.pack(pady=15)
 
         # Mostrar detalles del pedido
@@ -59,11 +64,23 @@ class ComprobanteView(tk.Toplevel):
         self.tiempo_entry.pack(pady=5)
 
         # Botón para validar y generar la captura
-        enviar_button = tk.Button(self.frame, text="Validar y Enviar Captura", command=self.enviar_captura, bg="#27AE60", fg="white", font=("Helvetica", 12, "bold"), width=25)
+        enviar_button = tk.Button(self.frame, text="Obtener Factura Electronica", command=self.enviar_captura, bg="#27AE60", fg="white", font=("Helvetica", 12, "bold"), width=25)
         enviar_button.pack(pady=10)
 
-        # Botón para confirmar el comprobante si el cliente está de acuerdo
-        confirmar_button = tk.Button(self.frame, text="Confirmar Comprobante", command=self.confirmar_comprobante, bg="#218ff9", fg="white", font=("Helvetica", 12, "bold"), width=25)
+        tk.Label(self, text="Sube el comprobante del cliente y", bg="#2C3E50", fg="white", font=("Helvetica", 12)).pack(pady=(20, 0))
+        tk.Label(self, text="selecciona el medio por el que pagó.", bg="#2C3E50", fg="white", font=("Helvetica", 12)).pack(pady=(0, 20))
+
+        # Botón "Comprobante Cliente" para subir imagen
+        comprobante_button = tk.Button(self, text="Subir Comprobante", command=self.subir_comprobante, bg="#27AE60", fg="white", font=("Helvetica", 12, "bold"), width=25)
+        comprobante_button.pack(pady=10)
+
+        # Dropdown para seleccionar el tipo de pago
+        tk.Label(self, text="Tipo de Pago:", bg="#2C3E50", fg="white", font=("Helvetica", 12)).pack(pady=5)
+        opciones_pago = ["Efectivo", "Consignación"]
+        self.dropdown_pago = tk.OptionMenu(self, self.tipo_pago_var, *opciones_pago)
+        self.dropdown_pago.pack(pady=5)
+
+        confirmar_button = tk.Button(self, text="Confirmar Comprobante", command=self.confirmar_comprobante, bg="#218ff9", fg="white", font=("Helvetica", 12, "bold"), width=25)
         confirmar_button.pack(pady=10)
 
     def center_window(self):
@@ -141,13 +158,47 @@ class ComprobanteView(tk.Toplevel):
 
         messagebox.showinfo("Éxito", f"Comprobante generado y guardado en: {file_path}")
 
-    def confirmar_comprobante(self):
-        cliente_acuerdo = messagebox.askyesno("Confirmación", "¿El cliente está de acuerdo con el comprobante?")
-        confirmar_comprobante_cliente(self.pedido_id, cliente_acuerdo)
-        if cliente_acuerdo:
-            messagebox.showinfo("Éxito", "Comprobante confirmado.")
+    def subir_comprobante(self):
+        # Selección del archivo (png o jpg)
+        filepath = filedialog.askopenfilename(filetypes=[("PNG Files", "*.png"), ("JPG Files", "*.jpg")])
+        if filepath:
+            # Guardar la imagen en la carpeta `src/clientes`
+            folder_path = os.path.join(os.getcwd(), 'src', 'clientes')
+            os.makedirs(folder_path, exist_ok=True)
+            file_extension = os.path.splitext(filepath)[1]
+            destination = os.path.join(folder_path, f'comprobante_{self.pedido_id}{file_extension}')
+            
+            # Verificar si ya existe un comprobante
+            if os.path.exists(destination):
+                messagebox.showerror("Error", "El pedido ya fue confirmado y hay un comprobante de pago del cliente cargado.")
+            else:
+                # Mover el archivo al destino
+                os.rename(filepath, destination)
+                messagebox.showinfo("Éxito", "Comprobante subido correctamente.")
+                self.comprobante_subido = destination
         else:
-            messagebox.showwarning("Información", "El cliente no está de acuerdo con el comprobante.")
+            self.comprobante_subido = None
+
+    def confirmar_comprobante(self):
+        # Verificar si el comprobante ya está confirmado
+        estado_comprobante = comprobar_estado_comprobante(self.pedido_id)
+
+        if estado_comprobante == "Confirmado por Cliente":
+            messagebox.showinfo("Aviso", "El comprobante ya ha sido confirmado y no se puede modificar nuevamente.")
+            return
+
+        if messagebox.askyesno("Confirmación", "¿El cliente ya realizó el pago y se subió el comprobante?"):
+            if self.comprobante_subido:
+                confirmar_comprobante_cliente(self.pedido_id, True)
+                messagebox.showinfo("Éxito", "Pedido confirmado.")
+                # Llamamos a la función en el parent para actualizar el historial
+                self.parent.mostrar_historial()  # Aquí se usa el parent correctamente
+                self.destroy()  # Cerramos la ventana de comprobante
+            else:
+                messagebox.showerror("Error", "Debe subir un comprobante antes de confirmar.")
+        else:
+            messagebox.showwarning("Información", "El pedido no ha sido confirmado.")
+
 
     def _on_mousewheel(self, event):
         """Permitir el desplazamiento con la rueda del ratón."""
