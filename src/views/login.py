@@ -74,7 +74,14 @@ class LoginView(tk.Toplevel):
         usuario = self.entry_usuario.get()
         password = self.entry_password.get()
 
+        # Verificar si ambos campos están llenos
+        if not usuario or not password:
+            messagebox.showerror("Error", "Por favor, complete todos los campos.")
+            return
+
         trabajador = get_trabajador_by_usuario(usuario)
+        
+        # Verificar si se encontró un trabajador y si la contraseña es correcta
         if trabajador and trabajador.password == password:
             messagebox.showinfo("Éxito", f"Bienvenido {trabajador.nombre}")
             self.destroy()  # Cierra la ventana de inicio de sesión
@@ -82,3 +89,4 @@ class LoginView(tk.Toplevel):
             MenuPrincipalView(self.parent, trabajador)  # Abre la vista del menú principal
         else:
             messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+

@@ -123,12 +123,18 @@ class ProductoSeleccionView(tk.Toplevel):
             del self.productos_seleccionados[producto_id]
 
     def terminar_pedido(self):
-        # Guardar todas las cantidades actualizadas en el pedido
-        for producto_id, cantidad in self.productos_seleccionados.items():
-            update_producto_cantidad(self.pedido_id, producto_id, cantidad)
-        
-        # Mostrar resumen del pedido para confirmarlo
-        resumen_view = ResumenPedidoView(self.master, self.pedido_id)
-        resumen_view.lift()  # Traer la ventana al frente
-        resumen_view.focus_force()  # Forzar el foco a la ventana de resumen
-        self.destroy()
+        # Verificar si al menos un producto tiene una cantidad mayor a 0
+        if any(cantidad > 0 for cantidad in self.productos_seleccionados.values()):
+            # Guardar todas las cantidades actualizadas en el pedido
+            for producto_id, cantidad in self.productos_seleccionados.items():
+                update_producto_cantidad(self.pedido_id, producto_id, cantidad)
+            
+            # Mostrar resumen del pedido para confirmarlo
+            resumen_view = ResumenPedidoView(self.master, self.pedido_id)
+            resumen_view.lift()  # Traer la ventana al frente
+            resumen_view.focus_force()  # Forzar el foco a la ventana de resumen
+            self.destroy()
+        else:
+            # Mostrar mensaje de advertencia si no hay productos seleccionados
+            tk.messagebox.showinfo("Información", "Debe seleccionar al menos un producto y asignar una cantidad mayor a 0.")
+

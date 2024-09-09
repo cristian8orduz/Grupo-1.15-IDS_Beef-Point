@@ -21,19 +21,19 @@ def get_trabajador_by_usuario(usuario=None):
         conn.close()
         return [Trabajador(*row) for row in rows]  # Devolver lista de trabajadores
 
-def create_trabajador(nombre, usuario, password):
+def create_trabajador(nombre, usuario, password, rol):
     conn = connect()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO trabajadores (nombre, usuario, password) VALUES (?, ?, ?)",
-                   (nombre, usuario, password))
+    cursor.execute("INSERT INTO trabajadores (nombre, usuario, password, rol) VALUES (?, ?, ?, ?)",
+                   (nombre, usuario, password, rol))
     conn.commit()
     conn.close()
 
-def update_trabajador(id, nuevo_nombre, nuevo_usuario, nuevo_password):
+def update_trabajador(id, nuevo_nombre, nuevo_usuario, nuevo_password, nuevo_rol):
     conn = connect()
     cursor = conn.cursor()
-    cursor.execute("UPDATE trabajadores SET nombre = ?, usuario = ?, password = ? WHERE id = ?",
-                   (nuevo_nombre, nuevo_usuario, nuevo_password, id))
+    cursor.execute("UPDATE trabajadores SET nombre = ?, usuario = ?, password = ?, rol = ? WHERE id = ?",
+                   (nuevo_nombre, nuevo_usuario, nuevo_password, nuevo_rol, id))
     conn.commit()
     conn.close()
 

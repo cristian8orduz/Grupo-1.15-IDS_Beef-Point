@@ -15,7 +15,8 @@ def create_tables():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL,
         usuario TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        rol TEXT NOT NULL  -- Añadir columna rol
     )
     ''')
 
@@ -89,15 +90,16 @@ def insert_initial_data():
     conn = connect()
     cursor = conn.cursor()
 
-    # Insertar trabajadores
+    # Insertar trabajadores con roles
     trabajadores = [
-        ('Cristian Plazas', 'cplazas', 'clave1'),
-        ('Samuel Gutiérrez', 'gsamuel', 'clave2'),
-        ('Santiago Lopez', 'slopez', 'clave3'),
+        ('Cristian Plazas', 'cplazas', 'clave1', 'Mesero'),
+        ('Samuel Gutiérrez', 'gsamuel', 'clave2', 'Auxiliar Cocina'),
+        ('Santiago Lopez', 'slopez', 'clave3', 'Administrador'),
     ]
     cursor.executemany('''
-    INSERT INTO trabajadores (nombre, usuario, password) VALUES (?, ?, ?)
+    INSERT INTO trabajadores (nombre, usuario, password, rol) VALUES (?, ?, ?, ?)
     ''', trabajadores)
+
 
     # Insertar mesas
     mesas = [(i,) for i in range(1, 11)]

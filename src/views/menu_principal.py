@@ -48,26 +48,46 @@ class MenuPrincipalView(tk.Toplevel):
             "cursor": "hand2"
         }
 
-        self.button_nuevo_pedido = tk.Button(button_frame, text="Nuevo Pedido", command=self.nuevo_pedido, **button_style)
-        self.button_nuevo_pedido.pack(pady=10)
+        # Mostrar botones según el rol del trabajador
+        if self.trabajador.rol == 'Mesero':
+            self.button_nuevo_pedido = tk.Button(button_frame, text="Nuevo Pedido", command=self.nuevo_pedido, **button_style)
+            self.button_nuevo_pedido.pack(pady=10)
 
-        self.button_pedido_domicilio = tk.Button(button_frame, text="Nuevo Pedido a Domicilio", command=self.pedido_domicilio, **button_style)
-        self.button_pedido_domicilio.pack(pady=10)
+            self.button_pedido_domicilio = tk.Button(button_frame, text="Nuevo Pedido a Domicilio", command=self.pedido_domicilio, **button_style)
+            self.button_pedido_domicilio.pack(pady=10)
 
-        self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
-        self.button_historial_pedidos.pack(pady=10)
+            self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
+            self.button_historial_pedidos.pack(pady=10)
 
-        self.button_admin_productos = tk.Button(button_frame, text="Administrar Productos", command=self.admin_productos, **button_style)
-        self.button_admin_productos.pack(pady=10)
+        elif self.trabajador.rol == 'Auxiliar Cocina':
+            self.button_nuevo_pedido = tk.Button(button_frame, text="Nuevo Pedido", command=self.nuevo_pedido, **button_style)
+            self.button_nuevo_pedido.pack(pady=10)
 
-        self.button_admin_trabajadores = tk.Button(button_frame, text="Administrar Trabajadores", command=self.admin_trabajadores, **button_style)
-        self.button_admin_trabajadores.pack(pady=10)
+            self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
+            self.button_historial_pedidos.pack(pady=10)
 
-        # Barra inferior con la información del usuario
+        elif self.trabajador.rol == 'Administrador':
+            self.button_nuevo_pedido = tk.Button(button_frame, text="Nuevo Pedido", command=self.nuevo_pedido, **button_style)
+            self.button_nuevo_pedido.pack(pady=10)
+
+            self.button_pedido_domicilio = tk.Button(button_frame, text="Nuevo Pedido a Domicilio", command=self.pedido_domicilio, **button_style)
+            self.button_pedido_domicilio.pack(pady=10)
+
+            self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
+            self.button_historial_pedidos.pack(pady=10)
+
+            self.button_admin_productos = tk.Button(button_frame, text="Administrar Productos", command=self.admin_productos, **button_style)
+            self.button_admin_productos.pack(pady=10)
+
+            self.button_admin_trabajadores = tk.Button(button_frame, text="Administrar Trabajadores", command=self.admin_trabajadores, **button_style)
+            self.button_admin_trabajadores.pack(pady=10)
+
+        # Barra inferior con la información del usuario y su rol
         footer_frame = tk.Frame(self, bg="#34495E")
         footer_frame.pack(fill=tk.X, side=tk.BOTTOM)
 
-        self.label_usuario = tk.Label(footer_frame, text=f"Usuario: {self.trabajador.nombre}", font=("Helvetica", 10), bg="#34495E", fg="white")
+        # Mostrar el nombre y rol del trabajador logeado
+        self.label_usuario = tk.Label(footer_frame, text=f"Usuario: {self.trabajador.nombre} | Rol: {self.trabajador.rol}", font=("Helvetica", 10), bg="#34495E", fg="white")
         self.label_usuario.pack(side=tk.LEFT, pady=5, padx=10)
 
         self.button_cerrar_sesion = tk.Button(footer_frame, text="Cerrar Sesión", command=self.cerrar_sesion, font=("Helvetica", 10, "bold"), bg="#E74C3C", fg="white", relief="flat", cursor="hand2")
