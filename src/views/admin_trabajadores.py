@@ -51,7 +51,7 @@ class AdminTrabajadoresView(tk.Toplevel):
 
         # Rol del trabajador
         tk.Label(main_frame, text="Rol:", font=("Helvetica", 12), bg="#2C3E50", fg="white").grid(row=5, column=0, padx=10, pady=10, sticky="e")
-        self.rol_combobox = ttk.Combobox(main_frame, font=("Helvetica", 12), state="readonly", values=["Mesero", "Auxiliar Cocina", "Administrador"])
+        self.rol_combobox = ttk.Combobox(main_frame, font=("Helvetica", 12), state="readonly", values=["Mesero", "Auxiliar Cocina", "Administrador", "Chef", "Domiciliario", "Co-propietario"])
         self.rol_combobox.grid(row=5, column=1, padx=10, pady=10, sticky="ew")
 
         # Botones de acción

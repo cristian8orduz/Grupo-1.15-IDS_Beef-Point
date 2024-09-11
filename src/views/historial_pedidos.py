@@ -91,13 +91,20 @@ class HistorialPedidosView(tk.Toplevel):
             comprobante_button = tk.Button(button_frame, text="Comprobante", command=lambda pid=pedido_id: self.mostrar_comprobante(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
             comprobante_button.pack(side="left", padx=5)
 
-            # Mostrar botones de editar y eliminar solo si el comprobante no ha sido confirmado
-            if estado_comprobante != 'Confirmado por Cliente':
-                edit_button = tk.Button(button_frame, text="Editar", command=lambda pid=pedido_id: self.editar_pedido(pid), bg="#218ff9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
-                edit_button.pack(side="left", padx=5)
+            # Condiciones para los roles que pueden Editar y Eliminar
+            if self.master.trabajador.rol in ['Administrador', 'Mesero', 'Auxiliar Cocina']:
+                # Mostrar botones de editar y eliminar si el comprobante no ha sido confirmado
+                if estado_comprobante != 'Confirmado por Cliente':
+                    edit_button = tk.Button(button_frame, text="Editar", command=lambda pid=pedido_id: self.editar_pedido(pid), bg="#218ff9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                    edit_button.pack(side="left", padx=5)
 
-                delete_button = tk.Button(button_frame, text="Eliminar", command=lambda pid=pedido_id: self.eliminar_pedido(pid), bg="#E74C3C", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
-                delete_button.pack(side="left", padx=5)
+                    delete_button = tk.Button(button_frame, text="Eliminar", command=lambda pid=pedido_id: self.eliminar_pedido(pid), bg="#E74C3C", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                    delete_button.pack(side="left", padx=5)
+
+            # Condiciones para los roles que solo pueden acceder al comprobante (Domiciliario y Co-propietario)
+            elif self.master.trabajador.rol in ['Domiciliario', 'Co-propietario', 'Chef']:
+                # Solo se muestra el botón de comprobante, ya que no pueden editar ni eliminar
+                pass
 
             separator = tk.Label(self.frame, text="─" * 60, fg="#7F8C8D", bg="#2C3E50")
             separator.pack(pady=10)

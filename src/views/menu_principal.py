@@ -53,15 +53,12 @@ class MenuPrincipalView(tk.Toplevel):
             self.button_nuevo_pedido = tk.Button(button_frame, text="Nuevo Pedido", command=self.nuevo_pedido, **button_style)
             self.button_nuevo_pedido.pack(pady=10)
 
-            self.button_pedido_domicilio = tk.Button(button_frame, text="Nuevo Pedido a Domicilio", command=self.pedido_domicilio, **button_style)
-            self.button_pedido_domicilio.pack(pady=10)
-
             self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
             self.button_historial_pedidos.pack(pady=10)
 
         elif self.trabajador.rol == 'Auxiliar Cocina':
-            self.button_nuevo_pedido = tk.Button(button_frame, text="Nuevo Pedido", command=self.nuevo_pedido, **button_style)
-            self.button_nuevo_pedido.pack(pady=10)
+            self.button_pedido_domicilio = tk.Button(button_frame, text="Nuevo Pedido a Domicilio", command=self.pedido_domicilio, **button_style)
+            self.button_pedido_domicilio.pack(pady=10)
 
             self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
             self.button_historial_pedidos.pack(pady=10)
@@ -82,6 +79,20 @@ class MenuPrincipalView(tk.Toplevel):
             self.button_admin_trabajadores = tk.Button(button_frame, text="Administrar Trabajadores", command=self.admin_trabajadores, **button_style)
             self.button_admin_trabajadores.pack(pady=10)
 
+        elif self.trabajador.rol in ['Chef', 'Domiciliario']:
+            self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
+            self.button_historial_pedidos.pack(pady=10)
+
+        elif self.trabajador.rol == 'Co-propietario':
+            self.button_historial_pedidos = tk.Button(button_frame, text="Ver Historial", command=self.ver_historial, **button_style)
+            self.button_historial_pedidos.pack(pady=10)
+
+            self.button_admin_productos = tk.Button(button_frame, text="Administrar Productos", command=self.admin_productos, **button_style)
+            self.button_admin_productos.pack(pady=10)
+
+            self.button_admin_trabajadores = tk.Button(button_frame, text="Administrar Trabajadores", command=self.admin_trabajadores, **button_style)
+            self.button_admin_trabajadores.pack(pady=10)
+            
         # Barra inferior con la información del usuario y su rol
         footer_frame = tk.Frame(self, bg="#34495E")
         footer_frame.pack(fill=tk.X, side=tk.BOTTOM)
