@@ -13,13 +13,15 @@ def get_trabajador_by_usuario(usuario=None):
         row = cursor.fetchone()
         conn.close()
         if row:
+            print(f"Usuario encontrado: {row}")  # Agregar depuración para verificar qué devuelve la base de datos
             return Trabajador(*row)  # Devolver un solo trabajador
+        print("No se encontró el usuario.")  # Depuración si no se encontró el usuario
         return None
     else:
         cursor.execute("SELECT * FROM trabajadores")
         rows = cursor.fetchall()
         conn.close()
-        return [Trabajador(*row) for row in rows]  # Devolver lista de trabajadores
+        return [Trabajador(*row) for row in rows]
 
 def create_trabajador(nombre, usuario, password, rol):
     conn = connect()

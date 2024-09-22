@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from controllers.pedido_controller import get_pedidos_confirmados, delete_pedido
+from controllers.pedido_controller import get_pedidos_confirmados, delete_pedido, marcar_preparado, marcar_entregado
 from controllers.producto_controller import get_precio_producto
 from views.editar_pedido import EditarPedidoView
 from views.comprobante_view import ComprobanteView
@@ -10,7 +10,7 @@ class HistorialPedidosView(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Historial de Pedidos - Beef Point")
-        self.geometry("800x450")  # Dimensiones más equilibradas
+        self.geometry("650x450")  # Dimensiones más equilibradas
         self.configure(bg="#2C3E50")
 
         # Centrar la ventana
@@ -61,16 +61,48 @@ class HistorialPedidosView(tk.Toplevel):
             pedido_id = pedido[0]
             mesa_o_domicilio = f"Domicilio - Cliente: {pedido[3]}, Dirección: {pedido[4]}" if pedido[1] is None else f"Mesa: {pedido[1]}"
             trabajador = pedido[2]
-            estado_comprobante = pedido[5]  # Estado del comprobante
+            estado_trabajador = pedido[5]  # Mostrar el estado_trabajador
+            estado_comprobante = pedido[6]  # Estado del comprobante
 
             # Verificación del estado del comprobante
             print(f"Pedido ID: {pedido_id}, Estado Comprobante: {estado_comprobante}")
 
-            pedido_label = tk.Label(self.frame, text=f"Pedido ID: {pedido_id}", font=("Helvetica", 14, "bold"), fg="#218ff9", bg="#2C3E50")
+            pedido_label = tk.Label(self.frame, text=f"Pedido ID: {pedido_id}, Estado: {estado_trabajador}", font=("Helvetica", 14, "bold"), fg="#218ff9", bg="#2C3E50")
             pedido_label.pack(anchor="w", padx=10, pady=5)
 
-            detalles_label = tk.Label(self.frame, text=f"{mesa_o_domicilio}, Trabajador: {trabajador}", font=("Helvetica", 12), fg="#BDC3C7", bg="#2C3E50")
+            tipos_label = tk.Label(self.frame, text=f"{mesa_o_domicilio}", font=("Helvetica", 12), fg="#BDC3C7", bg="#2C3E50")
+            tipos_label.pack(anchor="w", padx=20, pady=5)
+
+            detalles_label = tk.Label(self.frame, text=f"Trabajador: {trabajador}, Estado Pedido: {estado_trabajador}", font=("Helvetica", 12), fg="#BDC3C7", bg="#2C3E50")
             detalles_label.pack(anchor="w", padx=20, pady=5)
+
+            # Aviso en verde si el comprobante ha sido confirmado
+            if estado_comprobante == 'Confirmado por Cliente' and estado_trabajador == 'Preparado':
+                aviso_label = tk.Label(self.frame, text="El comprobante ha sido confirmado. El pedido puede ser entregado.", font=("Helvetica", 12, "bold"), fg="green", bg="#2C3E50")
+                aviso_label.pack(anchor="w", padx=20, pady=5)
+
+            # Aviso en rojo si el comprobante no ha sido confirmado
+            if estado_comprobante != 'Confirmado por Cliente' and estado_trabajador == 'Preparado':
+                aviso_label = tk.Label(self.frame, text="¡Atención! No se puede entregar, hasta que este confirmado el comprobante", font=("Helvetica", 12, "bold"), fg="red", bg="#2C3E50")
+                aviso_label.pack(anchor="w", padx=20, pady=5)
+
+            # Acciones del Chef: Solo el Chef puede cambiar el estado a "Preparado"
+            if self.master.trabajador.rol == 'Chef' and estado_trabajador == 'En preparación':
+                preparado_button = tk.Button(self.frame, text="Marcar como Preparado", command=lambda pid=pedido_id: self.marcar_preparado(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                preparado_button.pack(anchor="w", padx=10, pady=5)
+
+            # Acciones del Mesero: Solo puede entregar si el pedido es de una mesa, está "Preparado", y el comprobante está confirmado
+            if self.master.trabajador.rol == 'Mesero' and mesa_o_domicilio.startswith('Mesa') and estado_trabajador == 'Preparado' and estado_comprobante == 'Confirmado por Cliente':
+                entregado_button = tk.Button(self.frame, text="Marcar como Entregado", command=lambda pid=pedido_id: self.marcar_entregado(pid), bg="#2980B9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                entregado_button.pack(anchor="w", padx=10, pady=5)
+
+            # Acciones del Domiciliario: Solo puede entregar si el pedido es un domicilio, está "Preparado", y el comprobante está confirmado
+            if self.master.trabajador.rol == 'Domiciliario' and mesa_o_domicilio.startswith('Domicilio') and estado_trabajador == 'Preparado' and estado_comprobante == 'Confirmado por Cliente':
+                entregado_button = tk.Button(self.frame, text="Marcar como Entregado", command=lambda pid=pedido_id: self.marcar_entregado(pid), bg="#2980B9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                entregado_button.pack(anchor="w", padx=10, pady=5)
+
+            separator = tk.Label(self.frame, text="─" * 60, fg="#7F8C8D", bg="#2C3E50")
+            separator.pack(pady=10)
 
             total_pedido = 0
 
@@ -92,8 +124,8 @@ class HistorialPedidosView(tk.Toplevel):
             comprobante_button.pack(side="left", padx=5)
 
             # Condiciones para los roles que pueden Editar y Eliminar
-            if self.master.trabajador.rol in ['Administrador', 'Mesero', 'Auxiliar Cocina']:
-                # Mostrar botones de editar y eliminar si el comprobante no ha sido confirmado
+            if self.master.trabajador.rol in ['Administrador', 'Mesero', 'Auxiliar Cocina'] and estado_trabajador != 'Entregado':
+                # Mostrar botones de editar y eliminar si el comprobante no ha sido confirmado y el estado no es "Entregado"
                 if estado_comprobante != 'Confirmado por Cliente':
                     edit_button = tk.Button(button_frame, text="Editar", command=lambda pid=pedido_id: self.editar_pedido(pid), bg="#218ff9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
                     edit_button.pack(side="left", padx=5)
@@ -133,5 +165,11 @@ class HistorialPedidosView(tk.Toplevel):
         self.wait_window(self.winfo_children()[-1])
         self.mostrar_historial()
 
+    def marcar_preparado(self, pedido_id):
+        marcar_preparado(pedido_id)
+        self.mostrar_historial()  # Refrescar la vista después de cambiar el estado
 
+    def marcar_entregado(self, pedido_id):
+        marcar_entregado(pedido_id)
+        self.mostrar_historial()  # Refrescar la vista después de cambiar el estado
 

@@ -82,11 +82,15 @@ class LoginView(tk.Toplevel):
         trabajador = get_trabajador_by_usuario(usuario)
         
         # Verificar si se encontró un trabajador y si la contraseña es correcta
-        if trabajador and trabajador.password == password:
-            messagebox.showinfo("Éxito", f"Bienvenido {trabajador.nombre}")
-            self.destroy()  # Cierra la ventana de inicio de sesión
-            from views.menu_principal import MenuPrincipalView  # Importación movida aquí
-            MenuPrincipalView(self.parent, trabajador)  # Abre la vista del menú principal
+        if trabajador:
+            if trabajador.password == password:
+                messagebox.showinfo("Éxito", f"Bienvenido {trabajador.nombre}")
+                self.destroy()  # Cierra la ventana de inicio de sesión
+                from views.menu_principal import MenuPrincipalView  # Importación movida aquí
+                MenuPrincipalView(self.parent, trabajador)  # Abre la vista del menú principal
+            else:
+                messagebox.showerror("Error", "Contraseña incorrecta")
         else:
-            messagebox.showerror("Error", "Usuario o contraseña incorrectos")
+            messagebox.showerror("Error", "Usuario no encontrado")
+
 

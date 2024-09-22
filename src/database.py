@@ -51,6 +51,7 @@ def create_tables():
         trabajador_id INTEGER NOT NULL,
         fecha_hora TEXT NOT NULL,
         estado TEXT NOT NULL,
+        estado_trabajador TEXT DEFAULT 'En preparación',  -- Nueva columna con valor predeterminado
         direccion TEXT,
         numero_contacto TEXT,
         nombre_cliente TEXT,
@@ -92,9 +93,14 @@ def insert_initial_data():
 
     # Insertar trabajadores con roles
     trabajadores = [
-        ('Cristian Plazas', 'cplazas', 'clave1', 'Mesero'),
-        ('Samuel Gutiérrez', 'gsamuel', 'clave2', 'Auxiliar Cocina'),
+        ('Cristian Plazas', 'cplazas', 'clave1', 'Administrador'),
+        ('Samuel Gutiérrez', 'gsamuel', 'clave2', 'Administrador'),
         ('Santiago Lopez', 'slopez', 'clave3', 'Administrador'),
+        ('Jorge Pérez', 'mesero', 'clave4', 'Mesero'),
+        ('María Rojas', 'domiciliario', 'clave5', 'Domiciliario'),
+        ('Lucía Martínez', 'chef', 'clave6', 'Chef'),
+        ('Carlos Sánchez', 'auxiliar', 'clave7', 'Auxiliar Cocina'),
+        ('Ana Torres', 'atorres', 'clave8', 'Co-propietario')
     ]
     cursor.executemany('''
     INSERT INTO trabajadores (nombre, usuario, password, rol) VALUES (?, ?, ?, ?)
@@ -126,28 +132,28 @@ def insert_initial_data():
 
     # Insertar productos
     productos = [
-        ('Patacones con Hogao', categorias_dict['Entradas']),
-        ('Butifarras', categorias_dict['Entradas']),
-        ('Deditos de Yuca', categorias_dict['Entradas']),
-        ('Morcilla', categorias_dict['Entradas']),
-        ('Carne de Res', categorias_dict['Carnes']),
-        ('Carne de Cerdo', categorias_dict['Carnes']),
-        ('Pollo', categorias_dict['Carnes']),
-        ('Hamburguesa Tradicional', categorias_dict['Hamburguesas']),
-        ('Hamburguesa Argentina', categorias_dict['Hamburguesas']),
-        ('Hamburguesa Super Beef', categorias_dict['Hamburguesas']),
-        ('Arepa', categorias_dict['Otros']),
-        ('Patacón', categorias_dict['Otros']),
-        ('Papas Beef', categorias_dict['Otros']),
-        ('Chicken Bacon', categorias_dict['Otros']),
-        ('Nuggets', categorias_dict['Infantil']),
-        ('Salchipapa', categorias_dict['Infantil']),
-        ('Jugo', categorias_dict['Bebidas']),
-        ('Gaseosa', categorias_dict['Bebidas']),
-        ('Cerveza', categorias_dict['Bebidas']),
+        ('Patacones con Hogao', categorias_dict['Entradas'], 8000),
+        ('Butifarras', categorias_dict['Entradas'], 9000),
+        ('Deditos de Yuca', categorias_dict['Entradas'], 7000),
+        ('Morcilla', categorias_dict['Entradas'], 8500),
+        ('Carne de Res', categorias_dict['Carnes'], 22000),
+        ('Carne de Cerdo', categorias_dict['Carnes'], 18000),
+        ('Pollo', categorias_dict['Carnes'], 15000),
+        ('Hamburguesa Tradicional', categorias_dict['Hamburguesas'], 16000),
+        ('Hamburguesa Argentina', categorias_dict['Hamburguesas'], 18000),
+        ('Hamburguesa Super Beef', categorias_dict['Hamburguesas'], 20000),
+        ('Arepa', categorias_dict['Otros'], 4000),
+        ('Patacón', categorias_dict['Otros'], 5000),
+        ('Papas Beef', categorias_dict['Otros'], 7000),
+        ('Chicken Bacon', categorias_dict['Otros'], 12000),
+        ('Nuggets', categorias_dict['Infantil'], 9000),
+        ('Salchipapa', categorias_dict['Infantil'], 10000),
+        ('Jugo', categorias_dict['Bebidas'], 4000),
+        ('Gaseosa', categorias_dict['Bebidas'], 3000),
+        ('Cerveza', categorias_dict['Bebidas'], 7000),
     ]
     cursor.executemany('''
-    INSERT INTO productos (nombre, categoria_id) VALUES (?, ?)
+    INSERT INTO productos (nombre, categoria_id, precio) VALUES (?, ?, ?)
     ''', productos)
 
     conn.commit()

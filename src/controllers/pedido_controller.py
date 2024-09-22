@@ -105,8 +105,10 @@ def cancelar_pedido(pedido_id):
 def get_pedidos_confirmados():
     conn = connect()
     cursor = conn.cursor()
+
+    # Agregar estado_trabajador en la consulta SQL
     cursor.execute("""
-        SELECT p.id, p.mesa_id, t.nombre, p.nombre_cliente, p.direccion, cd.estado_comprobante
+        SELECT p.id, p.mesa_id, t.nombre, p.nombre_cliente, p.direccion, p.estado_trabajador, cd.estado_comprobante
         FROM pedidos p
         JOIN trabajadores t ON p.trabajador_id = t.id
         LEFT JOIN comprobantes_domicilio cd ON p.id = cd.pedido_id
@@ -115,7 +117,7 @@ def get_pedidos_confirmados():
     pedidos = cursor.fetchall()
 
     for pedido in pedidos:
-        print(f"Pedido ID: {pedido[0]}, Estado Comprobante: {pedido[5]}")  # Verificación
+        print(f"Pedido ID: {pedido[0]}, Estado Trabajador: {pedido[5]}, Estado Comprobante: {pedido[6]}")  # Verificación
 
     detalles = {}
     for pedido in pedidos:
@@ -296,3 +298,17 @@ def validar_comprobante_y_enviar_captura(pedido_id, captura):
     conn.close()
 
     print("Comprobante validado y captura enviada al cliente.")
+
+def marcar_preparado(pedido_id):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE pedidos SET estado_trabajador = 'Preparado' WHERE id = ?", (pedido_id,))
+    conn.commit()
+    conn.close()
+
+def marcar_entregado(pedido_id):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE pedidos SET estado_trabajador = 'Entregado' WHERE id = ?", (pedido_id,))
+    conn.commit()
+    conn.close()
