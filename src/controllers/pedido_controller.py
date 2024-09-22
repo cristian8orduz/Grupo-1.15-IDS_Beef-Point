@@ -113,7 +113,9 @@ def get_pedidos_confirmados():
         JOIN trabajadores t ON p.trabajador_id = t.id
         LEFT JOIN comprobantes_domicilio cd ON p.id = cd.pedido_id
         WHERE p.estado = 'Confirmado'
+        ORDER BY p.id DESC
     """)
+
     pedidos = cursor.fetchall()
 
     for pedido in pedidos:
