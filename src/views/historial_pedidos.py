@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
-from controllers.pedido_controller import get_pedidos_confirmados, delete_pedido, marcar_preparado, marcar_entregado
+from controllers.pedido_controller import get_pedidos_confirmados, delete_pedido, marcar_preparado, marcar_entregado, comprobar_estado_comprobante
 from controllers.producto_controller import get_precio_producto
 from views.editar_pedido import EditarPedidoView
 from views.comprobante_view import ComprobanteView
+from database import connect
 import os
 
 class HistorialPedidosView(tk.Toplevel):
@@ -83,7 +84,12 @@ class HistorialPedidosView(tk.Toplevel):
 
             # Aviso en rojo si el comprobante no ha sido confirmado
             if estado_comprobante != 'Confirmado por Cliente' and estado_trabajador == 'Preparado':
-                aviso_label = tk.Label(self.frame, text="¡Atención! No se puede entregar, hasta que este confirmado el comprobante", font=("Helvetica", 12, "bold"), fg="red", bg="#2C3E50")
+                aviso_label = tk.Label(self.frame, text="Este pedido está pendiente por pago y comprobante.", font=("Helvetica", 12, "bold"), fg="red", bg="#2C3E50")
+                aviso_label.pack(anchor="w", padx=20, pady=5)
+
+            # Si el pedido es de mesa y fue entregado pero no tiene el comprobante confirmado
+            if estado_trabajador == 'Entregado' and mesa_o_domicilio.startswith('Mesa') and estado_comprobante != 'Confirmado por Cliente':
+                aviso_label = tk.Label(self.frame, text="El pedido ha sido entregado, pero esta pendiente por pago.", font=("Helvetica", 12, "bold"), fg="orange", bg="#2C3E50")
                 aviso_label.pack(anchor="w", padx=20, pady=5)
 
             # Acciones del Chef: Solo el Chef puede cambiar el estado a "Preparado"
@@ -91,8 +97,8 @@ class HistorialPedidosView(tk.Toplevel):
                 preparado_button = tk.Button(self.frame, text="Marcar como Preparado", command=lambda pid=pedido_id: self.marcar_preparado(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
                 preparado_button.pack(anchor="w", padx=10, pady=5)
 
-            # Acciones del Mesero: Solo puede entregar si el pedido es de una mesa, está "Preparado", y el comprobante está confirmado
-            if self.master.trabajador.rol == 'Mesero' and mesa_o_domicilio.startswith('Mesa') and estado_trabajador == 'Preparado' and estado_comprobante == 'Confirmado por Cliente':
+            # Acciones del Mesero: Se permite la entrega aunque no se confirme el comprobante
+            if self.master.trabajador.rol == 'Mesero' and mesa_o_domicilio.startswith('Mesa') and estado_trabajador == 'Preparado':
                 entregado_button = tk.Button(self.frame, text="Marcar como Entregado", command=lambda pid=pedido_id: self.marcar_entregado(pid), bg="#2980B9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
                 entregado_button.pack(anchor="w", padx=10, pady=5)
 
@@ -100,6 +106,12 @@ class HistorialPedidosView(tk.Toplevel):
             if self.master.trabajador.rol == 'Domiciliario' and mesa_o_domicilio.startswith('Domicilio') and estado_trabajador == 'Preparado' and estado_comprobante == 'Confirmado por Cliente':
                 entregado_button = tk.Button(self.frame, text="Marcar como Entregado", command=lambda pid=pedido_id: self.marcar_entregado(pid), bg="#2980B9", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
                 entregado_button.pack(anchor="w", padx=10, pady=5)
+
+            # Comprobar si el pedido está entregado y el comprobante confirmado para finalizar
+            if estado_comprobante == 'Confirmado por Cliente' and estado_trabajador == 'Entregado':
+                aviso_label = tk.Label(self.frame, text="El pedido ha sido entregado y el comprobante confirmado. Finalizando trabajador.", font=("Helvetica", 12, "bold"), fg="green", bg="#2C3E50")
+                aviso_label.pack(anchor="w", padx=20, pady=5)
+                self.marcar_finalizado(pedido_id)
 
             separator = tk.Label(self.frame, text="─" * 60, fg="#7F8C8D", bg="#2C3E50")
             separator.pack(pady=10)
@@ -171,5 +183,27 @@ class HistorialPedidosView(tk.Toplevel):
 
     def marcar_entregado(self, pedido_id):
         marcar_entregado(pedido_id)
-        self.mostrar_historial()  # Refrescar la vista después de cambiar el estado
+        estado_comprobante = comprobar_estado_comprobante(pedido_id)
+
+        # Si el comprobante está confirmado, cambiar el estado del trabajador a "Finalizado"
+        if estado_comprobante == 'Confirmado por Cliente':
+            self.marcar_finalizado(pedido_id)
+        self.mostrar_historial()
+
+    def marcar_finalizado(self, pedido_id):
+        conn = connect()
+        cursor = conn.cursor()
+
+        # Agregar mensaje de depuración para ver si llega aquí
+        print(f"Actualizando el estado a 'Finalizado' para el pedido {pedido_id}")
+
+        cursor.execute("UPDATE pedidos SET estado_trabajador = 'Finalizado' WHERE id = ?", (pedido_id,))
+        conn.commit()
+
+        # Verificar si realmente cambió en la base de datos
+        cursor.execute("SELECT estado_trabajador FROM pedidos WHERE id = ?", (pedido_id,))
+        estado_actual = cursor.fetchone()[0]
+        print(f"Estado actual del pedido {pedido_id} en la base de datos: {estado_actual}")
+
+        conn.close()
 
