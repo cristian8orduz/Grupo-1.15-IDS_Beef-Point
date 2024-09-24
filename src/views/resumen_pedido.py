@@ -135,13 +135,20 @@ class ResumenPedidoView(tk.Toplevel):
         total_label.pack(anchor="w", padx=10, pady=10)
 
     def confirmar_pedido(self):
-        # Actualizar la información del pedido solo si es a domicilio
+        # Validar que los campos del cliente no estén vacíos si es un pedido a domicilio
         if self.entry_nombre_cliente and self.entry_direccion and self.entry_contacto:
-            nombre_cliente = self.entry_nombre_cliente.get()
-            direccion = self.entry_direccion.get()
-            numero_contacto = self.entry_contacto.get()
+            nombre_cliente = self.entry_nombre_cliente.get().strip()
+            direccion = self.entry_direccion.get().strip()
+            numero_contacto = self.entry_contacto.get().strip()
+
+            if not nombre_cliente or not direccion or not numero_contacto:
+                tk.messagebox.showerror("Error", "Los campos de Nombre del Cliente, Dirección y Número de Contacto no pueden estar vacíos.")
+                return
+            
+            # Actualizar la información del cliente si todo es válido
             update_pedido_info(self.pedido_id, nombre_cliente, direccion, numero_contacto)
 
+        # Confirmar el pedido
         confirmar_pedido(self.pedido_id)
         tk.messagebox.showinfo("Éxito", "Pedido confirmado.")
         self.destroy()

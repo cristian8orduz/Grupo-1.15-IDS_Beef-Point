@@ -18,6 +18,14 @@ class ComprobanteView(tk.Toplevel):
         self.tipo_pago_var = tk.StringVar(value="Efectivo")
         self.comprobante_subido = None
 
+        # Cargar los valores de tiempo_llegada y tipo_pago desde la base de datos
+        tiempo_llegada = self.pedido.tiempo_llegada if self.pedido.tiempo_llegada else "15"
+        tipo_pago = self.pedido.tipo_pago if self.pedido.tipo_pago else "Efectivo"
+
+        self.tiempo_var = tk.StringVar(value=tiempo_llegada)
+        self.tipo_pago_var = tk.StringVar(value=tipo_pago)
+        self.comprobante_subido = None
+
         # Centrar la ventana
         self.center_window()
 
@@ -45,12 +53,13 @@ class ComprobanteView(tk.Toplevel):
         # Sección de detalles del pedido
         self.mostrar_detalles_pedido()
 
-        # Tiempo estimado de llegada
-        tiempo_frame = tk.Frame(self.frame, bg="#34495E")
-        tiempo_frame.pack(pady=15)
-        tk.Label(tiempo_frame, text="Tiempo estimado de llegada (min):", font=("Helvetica", 14), bg="#34495E", fg="white").pack(side="left")
-        self.tiempo_entry = tk.Entry(tiempo_frame, textvariable=self.tiempo_var, font=("Helvetica", 14), width=5)
-        self.tiempo_entry.pack(side="left", padx=10)
+        # Mostrar "Tiempo estimado de llegada" solo si el pedido es a domicilio
+        if self.pedido.mesa_id is None:
+            tiempo_frame = tk.Frame(self.frame, bg="#34495E")
+            tiempo_frame.pack(pady=15)
+            tk.Label(tiempo_frame, text="Tiempo estimado de llegada (min):", font=("Helvetica", 14), bg="#34495E", fg="white").pack(side="left")
+            self.tiempo_entry = tk.Entry(tiempo_frame, textvariable=self.tiempo_var, font=("Helvetica", 14), width=5)
+            self.tiempo_entry.pack(side="left", padx=10)
 
         # Divisor
         self.crear_divisor()
@@ -275,7 +284,10 @@ class ComprobanteView(tk.Toplevel):
                 return
 
             if messagebox.askyesno("Confirmación", "¿El cliente ya realizó el pago y se subió el comprobante?"):
-                confirmar_comprobante_cliente(self.pedido_id, True)
+                tiempo_llegada = self.tiempo_var.get() if self.pedido.mesa_id is None else None  # Solo para pedidos a domicilio
+                tipo_pago = self.tipo_pago_var.get()
+                
+                confirmar_comprobante_cliente(self.pedido_id, True, tiempo_llegada, tipo_pago)
                 messagebox.showinfo("Éxito", "Pedido confirmado.")
                 self.parent.mostrar_historial()
                 self.destroy()

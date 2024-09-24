@@ -168,6 +168,27 @@ class EditarPedidoView(tk.Toplevel):
             frame.destroy()
 
     def guardar_cambios(self):
+
+         # Verificar que al menos haya un producto con cantidad mayor a 0
+        productos_validos = any(cantidad_var.get() > 0 for _, (cantidad_var, _) in self.productos_actualizados.items()) or \
+                            any(cantidad_var.get() > 0 for _, cantidad_var in self.nuevos_productos)
+
+        if not productos_validos:
+            tk.messagebox.showerror("Error", "El pedido debe tener al menos un producto con cantidad mayor a 0.")
+            return
+    
+        # Si es un pedido a domicilio, validar que los campos de información del cliente no estén vacíos
+        if hasattr(self, 'entry_nombre_cliente') and hasattr(self, 'entry_direccion') and hasattr(self, 'entry_contacto'):
+            nombre_cliente = self.entry_nombre_cliente.get().strip()
+            direccion = self.entry_direccion.get().strip()
+            numero_contacto = self.entry_contacto.get().strip()
+
+            if not nombre_cliente or not direccion or not numero_contacto:
+                tk.messagebox.showerror("Error", "Los campos de Nombre del Cliente, Dirección y Número de Contacto no pueden estar vacíos.")
+                return
+
+            update_pedido_info(self.pedido_id, nombre_cliente, direccion, numero_contacto)
+
         # Eliminar productos seleccionados
         for producto_id in self.productos_eliminar:
             delete_producto_from_pedido(self.pedido_id, producto_id)
@@ -183,13 +204,6 @@ class EditarPedidoView(tk.Toplevel):
             nueva_cantidad = cantidad_var.get()
             if nueva_cantidad > 0:
                 add_producto_to_pedido(self.pedido_id, producto_id, nueva_cantidad)
-
-        # Actualizar la información del cliente si es un pedido a domicilio
-        if hasattr(self, 'entry_nombre_cliente') and hasattr(self, 'entry_direccion') and hasattr(self, 'entry_contacto'):
-            nombre_cliente = self.entry_nombre_cliente.get()
-            direccion = self.entry_direccion.get()
-            numero_contacto = self.entry_contacto.get()
-            update_pedido_info(self.pedido_id, nombre_cliente, direccion, numero_contacto)
 
         tk.messagebox.showinfo("Éxito", "Todos los cambios han sido guardados.")
         self.parent.mostrar_historial()

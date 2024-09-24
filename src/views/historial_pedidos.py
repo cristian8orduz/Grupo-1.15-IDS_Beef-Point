@@ -131,9 +131,18 @@ class HistorialPedidosView(tk.Toplevel):
             button_frame = tk.Frame(self.frame, bg="#2C3E50")
             button_frame.pack(anchor="w", padx=20, pady=5)
 
-            # Mostrar el botón de comprobante siempre
-            comprobante_button = tk.Button(button_frame, text="Comprobante", command=lambda pid=pedido_id: self.mostrar_comprobante(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
-            comprobante_button.pack(side="left", padx=5)
+            # Mostrar el botón de comprobante según el rol y el tipo de pedido
+            if self.master.trabajador.rol == 'Mesero' and mesa_o_domicilio.startswith('Mesa'):
+                comprobante_button = tk.Button(button_frame, text="Comprobante", command=lambda pid=pedido_id: self.mostrar_comprobante(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                comprobante_button.pack(side="left", padx=5)
+
+            elif self.master.trabajador.rol in ['Domiciliario', 'Auxiliar Cocina'] and mesa_o_domicilio.startswith('Domicilio'):
+                comprobante_button = tk.Button(button_frame, text="Comprobante", command=lambda pid=pedido_id: self.mostrar_comprobante(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                comprobante_button.pack(side="left", padx=5)
+
+            elif self.master.trabajador.rol in ['Administrador', 'Co-propietario']:
+                comprobante_button = tk.Button(button_frame, text="Comprobante", command=lambda pid=pedido_id: self.mostrar_comprobante(pid), bg="#27AE60", fg="white", font=("Helvetica", 10, "bold"), relief="flat", cursor="hand2")
+                comprobante_button.pack(side="left", padx=5)
 
             # Condiciones para los roles que pueden Editar y Eliminar
             if self.master.trabajador.rol in ['Administrador', 'Mesero', 'Auxiliar Cocina'] and estado_trabajador != 'Entregado':

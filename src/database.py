@@ -55,6 +55,8 @@ def create_tables():
         direccion TEXT,
         numero_contacto TEXT,
         nombre_cliente TEXT,
+        tiempo_llegada TEXT,
+        tipo_pago TEXT,
         tipo_pedido TEXT DEFAULT 'Mesa',
         FOREIGN KEY (mesa_id) REFERENCES mesas(id),
         FOREIGN KEY (trabajador_id) REFERENCES trabajadores(id)
@@ -96,11 +98,11 @@ def insert_initial_data():
         ('Cristian Plazas', 'cplazas', 'clave1', 'Administrador'),
         ('Samuel Gutiérrez', 'gsamuel', 'clave2', 'Administrador'),
         ('Santiago Lopez', 'slopez', 'clave3', 'Administrador'),
-        ('Jorge Pérez', 'mesero', 'clave4', 'Mesero'),
-        ('María Rojas', 'domiciliario', 'clave5', 'Domiciliario'),
-        ('Lucía Martínez', 'chef', 'clave6', 'Chef'),
-        ('Carlos Sánchez', 'auxiliar', 'clave7', 'Auxiliar Cocina'),
-        ('Ana Torres', 'atorres', 'clave8', 'Co-propietario')
+        ('Jorge Pérez', 'mesero', 'mesero', 'Mesero'),
+        ('María Rojas', 'domiciliario', 'domiciliario', 'Domiciliario'),
+        ('Lucía Martínez', 'chef', 'chef', 'Chef'),
+        ('Carlos Sánchez', 'auxiliar', 'auxiliar', 'Auxiliar Cocina'),
+        ('Ana Torres', 'Copropietario', 'Copropietario', 'Co-propietario')
     ]
     cursor.executemany('''
     INSERT INTO trabajadores (nombre, usuario, password, rol) VALUES (?, ?, ?, ?)

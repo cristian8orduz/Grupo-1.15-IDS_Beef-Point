@@ -22,7 +22,7 @@ def get_pedido(pedido_id):
     conn = connect()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, mesa_id, trabajador_id, fecha_hora, estado, direccion, numero_contacto, nombre_cliente, tipo_pedido 
+        SELECT id, mesa_id, trabajador_id, fecha_hora, estado, direccion, numero_contacto, nombre_cliente, tipo_pedido, tiempo_llegada, tipo_pago
         FROM pedidos WHERE id = ?
     """, (pedido_id,))
     row = cursor.fetchone()
@@ -254,7 +254,7 @@ def crear_comprobante_si_no_existe(pedido_id):
 
     conn.close()
 
-def confirmar_comprobante_cliente(pedido_id, cliente_acuerdo):
+def confirmar_comprobante_cliente(pedido_id, cliente_acuerdo, tiempo_llegada=None, tipo_pago=None):
     crear_comprobante_si_no_existe(pedido_id)  # Asegurar que existe el comprobante
 
     conn = connect()
@@ -267,6 +267,18 @@ def confirmar_comprobante_cliente(pedido_id, cliente_acuerdo):
         WHERE pedido_id = ?
         ''', (pedido_id,))
         print(f"Comprobante para pedido {pedido_id} confirmado por el cliente.")
+
+        # Almacenar tiempo estimado de llegada y tipo de pago si se proporcionan
+        if tiempo_llegada and tipo_pago:
+            cursor.execute('''
+            UPDATE pedidos
+            SET tiempo_llegada = ?, tipo_pago = ?
+            WHERE id = ?
+            ''', (tiempo_llegada, tipo_pago, pedido_id))
+            print(f"Tiempo de llegada: {tiempo_llegada}, Tipo de pago: {tipo_pago} guardados para el pedido {pedido_id}.")
+        else:
+            print("No se proporcionaron valores de tiempo_llegada o tipo_pago.")
+
     else:
         print(f"El cliente no está de acuerdo con el comprobante del pedido {pedido_id}.")
 
